@@ -24,6 +24,7 @@
 
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE NoStarIsType #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
@@ -40,7 +41,7 @@ module Kinds.Num
          , FromNat, ToInteger
 
            -- * Arithmetic
-         , type (+), type (-)
+         , type (+), type (-), type (*)
 
            -- * Utility
          , Proven, IsLT, IsLE, IsGT, IsGE, IsEQ, IsNE
@@ -49,7 +50,7 @@ module Kinds.Num
 import Prelude hiding (Integer)
 
 import GHC.TypeNats (CmpNat, Nat)
-import qualified GHC.TypeNats as N (type (+), type (-))
+import qualified GHC.TypeNats as N (type (+), type (-), type (*))
 
 import {-# source #-}  Kinds.Integer (Integer(..))
 
@@ -82,6 +83,11 @@ type instance x + y = (N.+) x y  -- HLint doesn't like qualified TypeOperators.
 type family (x :: k) - (y :: k) :: k
 
 type instance x - y = (N.-) x y
+
+-- | Type-level multiplication "kindclass".
+type family (x :: k) * (y :: k) :: k
+
+type instance x * y = (N.*) x y
 
 infix 4 <?, >?, <=?, >=?, ==?, /=?
 

@@ -30,6 +30,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE MagicHash #-}
+{-# LANGUAGE NoStarIsType #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
@@ -57,7 +58,7 @@ import qualified Prelude as P
 import GHC.Exts (proxy#)
 import GHC.TypeNats (KnownNat, Nat, natVal')
 
-import Kinds.Num (type (+), type (-), Cmp, FromNat, ToInteger)
+import Kinds.Num (type (+), type (-), type (*), Cmp, FromNat, ToInteger)
 
 -- | Type-level signed numbers
 data Integer = Pos Nat | Neg Nat
@@ -139,3 +140,10 @@ type family SubInteger m n where
   SubInteger ('Pos m) ('Neg n) = 'Pos (m + n)
   SubInteger ('Neg m) ('Pos n) = 'Neg (m + n)
   SubInteger ('Neg m) ('Neg n) = n -# m
+
+-- | Multiplication of type-level integers.
+type family MulInteger m n where
+  MulInteger ('Pos m) ('Pos n) = 'Pos (m * n)
+  MulInteger ('Pos m) ('Neg n) = 0 -# (m * n)
+  MulInteger ('Neg m) ('Pos n) = 0 -# (m * n)
+  MulInteger ('Neg m) ('Neg n) = 'Pos (m * n)

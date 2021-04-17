@@ -26,6 +26,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE NoStarIsType #-}
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RoleAnnotations #-}
@@ -33,36 +34,53 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UnboxedTuples #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 module Data.SNumber
-  ( -- * SNumber
-    SNumber(N#, unSNumber), SNumberRepr(..)
+         ( -- * SNumber
+           SNumber(N#, unSNumber), SNumberRepr(..)
 
-    -- ** Creation
-  , snumber, trySNumber, unsafeUncheckedSNumber
-  , unsafeMkSNumber, unsafeTryMkSNumber, unsafeUncheckedMkSNumber
+           -- ** Creation
+         , snumber, trySNumber, unsafeUncheckedSNumber
+         , unsafeMkSNumber, unsafeTryMkSNumber, unsafeUncheckedMkSNumber
 
-    -- ** Existentials
-  , SomeSNumber(..), someSNumberVal, withSNumber
+           -- ** Existentials
+         , SomeSNumber(..), someSNumberVal, withSNumber
 
-    -- ** Comparison
-  , SOrdering(..), compareSNumber, sameSNumber
+           -- ** Comparison
+         , SOrdering(..), compareSNumber, sameSNumber
 
-    -- ** Reification to Constraints
-  , KnownSNumber(..), snumberVal
-  , reifySNumber, reifySNumberAsNat
+           -- ** Arithmetic
+         , OverflowArith(..)
 
-    -- * Miscellaneous
-  , IntBits, IntMin, IntMaxP1
-  , WordBits, WordMaxP1
-  ) where
+           -- *** In 'Maybe'
+         , tryAdd, trySub, tryMul
 
+           -- *** Checked
+         , UnrepresentableSNumber(..)
+         , chkAdd, chkSub, chkMul
+
+           -- ** Reification to Constraints
+         , KnownSNumber(..), snumberVal
+         , reifySNumber, reifySNumberAsNat
+
+           -- * Miscellaneous
+         , IntBits, IntMin, IntMaxP1
+         , WordBits, WordMaxP1
+         ) where
+
+import Control.Exception (Exception, throw)
 import Data.Kind (Constraint, Type)
 import Data.Maybe (fromMaybe)
 import Data.Proxy (Proxy(..))
 import Data.Type.Equality ((:~:)(Refl))
-import GHC.TypeNats (type (^), type (-), KnownNat, Nat, SomeNat(..), someNatVal)
+import GHC.Exts
+         ( Word(W#), addWordC#, subWordC#, timesWord2#
+         , Int(I#), addIntC#, subIntC#, mulIntMayOflo#, (*#)
+         )
+import GHC.Stack (HasCallStack, withFrozenCallStack)
+import GHC.TypeNats (type (^), KnownNat, Nat, SomeNat(..), someNatVal)
 import Numeric.Natural (Natural)
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -72,6 +90,7 @@ import Data.SNumber.Internal
          )
 import Kinds.Integer (CmpInteger, KnownInteger(..), pattern Pos, pattern Neg)
 import qualified Kinds.Integer as K (Integer)
+import Kinds.Num (type (+), type (-), type (*))
 
 #include "MachDeps.h"
 
@@ -399,3 +418,112 @@ someSNumberVal x = withSNumber x SomeSNumber
 -- | Like 'someSNumberVal', but in quantified CPS style rather than GADT style.
 withSNumber :: SNumberRepr a => a -> (forall n. SNumber a n -> r) -> r
 withSNumber x r = r (N# x)
+
+-- | Arithmetic ops with overflow detection.
+--
+-- Laws:
+--
+-- * @overflowAdd x y = (False, xy) =>
+--      toInteger xy === toInteger x + toInteger y@
+-- * @overflowSub x y = (False, xy) =>
+--      toInteger xy === toInteger x - toInteger y@
+-- * @overflowMul x y = (False, xy) =>
+--      toInteger xy === toInteger x * toInteger y@
+--
+-- This is used for arithmetic on 'SNumber' runtime values, so creating
+-- incorrect instances is type-unsafe.
+class Integral a => OverflowArith a where
+  overflowAdd :: a -> a -> (Bool, a)
+  overflowSub :: a -> a -> (Bool, a)
+  overflowMul :: a -> a -> (Bool, a)
+
+instance OverflowArith Word where
+  overflowAdd (W# x) (W# y) =
+    case addWordC# x y of (# xy, ovf #) -> (I# ovf /= 0, W# xy)
+  overflowSub (W# x) (W# y) =
+    case subWordC# x y of (# xy, ovf #) -> (I# ovf /= 0, W# xy)
+  overflowMul (W# x) (W# y) =
+    case timesWord2# x y of (# hi, lo #) -> (W# hi /= 0, W# lo)
+
+instance OverflowArith Int where
+  overflowAdd (I# x) (I# y) =
+    case addIntC# x y of (# xy, ovf #) -> (I# ovf /= 0, I# xy)
+  overflowSub (I# x) (I# y) =
+    case subIntC# x y of (# xy, ovf #) -> (I# ovf /= 0, I# xy)
+  overflowMul (I# x) (I# y) =
+    -- TODO(awpr): Newer versions of base have 'timesInt2#'; consider using CPP
+    -- to use that when available.
+    let xy = I# (x *# y)
+    in  case mulIntMayOflo# x y of
+          ovf -> if I# ovf /= 0
+            then (toInteger xy /= toInteger (I# x) * toInteger (I# y), xy)
+            else (False, I# (x *# y))
+
+instance OverflowArith Natural where
+  overflowAdd x y = (False, x + y)
+  overflowSub x y = (x > y, x - y)
+  overflowMul x y = (False, x * y)
+
+instance OverflowArith Integer where
+  overflowAdd x y = (False, x + y)
+  overflowSub x y = (False, x - y)
+  overflowMul x y = (False, x * y)
+
+-- Note: this internal helper function will make any SNumber result you want,
+-- thus "unsafe".
+unsafeMkTry
+  :: (a -> a -> (Bool, a)) -> SNumber a n -> SNumber a m -> Maybe (SNumber a o)
+unsafeMkTry f (N# x) (N# y) = case f x y of
+  (True, _) -> Nothing
+  (False, xy) -> Just (N# xy)
+
+-- | Compute a runtime witness of @m + n@, or 'Nothing'.
+tryAdd
+  :: (SNumberRepr a, OverflowArith a)
+  => SNumber a m -> SNumber a n -> Maybe (SNumber a (m + n))
+tryAdd = unsafeMkTry overflowAdd
+
+-- | Compute a runtime witness of @m - n@, or 'Nothing'.
+trySub
+  :: (SNumberRepr a, OverflowArith a)
+  => SNumber a m -> SNumber a n -> Maybe (SNumber a (m - n))
+trySub = unsafeMkTry overflowSub
+
+-- | Compute a runtime witness of @m * n@, or 'Nothing'.
+tryMul
+  :: (SNumberRepr a, OverflowArith a)
+  => SNumber a m -> SNumber a n -> Maybe (SNumber a (m * n))
+tryMul = unsafeMkTry overflowMul
+
+data UnrepresentableSNumber = UnrepresentableSNumber String Integer Integer
+  deriving Show
+
+instance Exception UnrepresentableSNumber
+
+-- Note: this internal helper function will make any SNumber result you want,
+-- thus "unsafe".
+unsafeMkChk
+  :: (HasCallStack, Integral a)
+  => String
+  -> (a -> a -> (Bool, a)) -> SNumber a n -> SNumber a m -> SNumber a o
+unsafeMkChk s f (N# x) (N# y) = case f x y of
+  (True, _) -> throw (UnrepresentableSNumber s (toInteger x) (toInteger y))
+  (False, xy) -> N# xy
+
+-- | Compute a runtime witness of @m + n@, or throw.
+chkAdd
+  :: (SNumberRepr a, OverflowArith a, HasCallStack)
+  => SNumber a m -> SNumber a n -> SNumber a (m + n)
+chkAdd = withFrozenCallStack unsafeMkChk "+" overflowAdd
+
+-- | Compute a runtime witness of @m - n@, or throw.
+chkSub
+  :: (SNumberRepr a, OverflowArith a, HasCallStack)
+  => SNumber a m -> SNumber a n -> SNumber a (m - n)
+chkSub = withFrozenCallStack unsafeMkChk "-" overflowSub
+
+-- | Compute a runtime witness of @m * n@, or throw.
+chkMul
+  :: (SNumberRepr a, OverflowArith a, HasCallStack)
+  => SNumber a m -> SNumber a n -> SNumber a (m * n)
+chkMul = withFrozenCallStack unsafeMkChk "*" overflowMul
