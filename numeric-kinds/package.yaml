@@ -33,7 +33,7 @@ extra-source-files:
 ghc-options: -Wall -Werror
 
 dependencies:
-  - base
+  - base >= 4.12 && < 4.16
 
 library:
   source-dirs: src

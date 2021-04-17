@@ -35,8 +35,8 @@ extra-source-files:
 ghc-options: -Wall -Werror
 
 dependencies:
-  - base
-  - numeric-kinds
+  - base >= 4.12 && < 4.16
+  - numeric-kinds >= 0.1 && < 0.2
 
 library:
   source-dirs: src

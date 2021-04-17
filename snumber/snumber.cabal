@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 5ca533a51984af98bf4756a9f1591b379ded992ec01ee91e33bd61b6fcf67fbb
+-- hash: 0872e37003cfe76616b3bd960bf42778a902f043f1d6bf0b265022ab64ecb253
 
 name:           snumber
 version:        0.1.0.0
@@ -23,7 +23,7 @@ copyright:      2020-2021 Google LLC
 license:        Apache-2.0
 build-type:     Simple
 extra-source-files:
-  CHANGELOG.md
+    CHANGELOG.md
 
 source-repository head
   type: git
@@ -32,14 +32,14 @@ source-repository head
 
 library
   exposed-modules:
-    Data.SNumber
+      Data.SNumber
   other-modules:
-    Data.SNumber.Internal
-    Paths_snumber
+      Data.SNumber.Internal
+      Paths_snumber
   hs-source-dirs:
-    src
+      src
   ghc-options: -Wall -Werror
   build-depends:
-    base,
-    numeric-kinds
+      base >=4.12 && <4.16
+    , numeric-kinds >=0.1 && <0.2
   default-language: Haskell2010

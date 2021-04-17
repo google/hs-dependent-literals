@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 73f519bf612baf4b84529efefd1f8a787c4e8f3b651f052a2d48bac842966c2e
+-- hash: 96f0bbad301b08772d7075f9c2028863996167d8e9f19ef650937f0c38c50044
 
 name:           numeric-kinds
 version:        0.1.0.0
@@ -38,5 +38,5 @@ library
     src
   ghc-options: -Wall -Werror
   build-depends:
-    base
+    base >=4.12 && <4.16
   default-language: Haskell2010
