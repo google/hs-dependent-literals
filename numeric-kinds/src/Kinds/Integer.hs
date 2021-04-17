@@ -93,6 +93,8 @@ type instance x + y = AddInteger x y
 
 type instance x - y = SubInteger x y
 
+type instance x * y = MulInteger x y
+
 -- | Comparison of type-level integers.
 type family CmpInteger m n where
   CmpInteger ('Pos m) ('Pos n) = Cmp m n
