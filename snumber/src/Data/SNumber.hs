@@ -62,6 +62,9 @@ module Data.SNumber
          , UnrepresentableSNumber(..)
          , chkAdd, chkSub, chkMul
 
+           -- ** Infallible
+         , divExact
+
            -- ** Reification to Constraints
          , KnownSNumber(..), snumberVal
          , reifySNumber, reifySNumberAsNat
@@ -539,3 +542,10 @@ chkMul
   :: (SNumberRepr a, OverflowArith a, HasCallStack)
   => SNumber a m -> SNumber a n -> SNumber a (m * n)
 chkMul = withFrozenCallStack unsafeMkChk "*" overflowMul
+
+-- | Compute a runtime witness of exact division.
+--
+-- We could provide division in terms of 'GHC.TypeNats.Div' instead, but
+-- "Kinds.Integer" doesn't currently have division.
+divExact :: SNumberRepr a => SNumber a (m * n) -> SNumber a n -> SNumber a m
+divExact = unsafeMkChk "/" (\x y -> (False, x `div` y))

@@ -51,6 +51,7 @@ module Kinds.Integer
 
            -- * Axioms
          , plusMinusInverseL, plusMinusInverseR
+         , mulCommutes
 
            -- * Utility
          , CaseOrdering
@@ -164,3 +165,7 @@ plusMinusInverseR = unsafeAxiom
 -- | Subtracting the left summand gives back the right summand.
 plusMinusInverseL :: (m + n) -# m :~: 'Pos n
 plusMinusInverseL = unsafeAxiom
+
+-- | Multiplication of integers is commutative.
+mulCommutes :: MulInteger m n :~: MulInteger n m
+mulCommutes = unsafeAxiom
