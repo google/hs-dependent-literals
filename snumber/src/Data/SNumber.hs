@@ -36,10 +36,11 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UnboxedTuples #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE ViewPatterns #-}
 
 module Data.SNumber
          ( -- * SNumber
-           SNumber(N#, unSNumber), SNumberRepr(..)
+           SNumber(N#, SNumber, unSNumber), SNumberRepr(..)
 
            -- ** Creation
          , snumber, trySNumber, unsafeUncheckedSNumber
@@ -193,6 +194,17 @@ type role SNumber nominal nominal
 pattern N# :: forall (n :: K.Integer) a. a -> SNumber a n
 pattern N# {unSNumber} = MkSNumber# unSNumber
 {-# COMPLETE N# #-}
+
+data KnownSNumberDict a n = KnownSNumber a n => KnownSNumberDict
+
+-- | Treat 'SNumber' as if it were a GADT containing a 'KnownSNumber' instance.
+pattern SNumber
+  :: forall (n :: K.Integer) a. SNumberRepr a => KnownSNumber a n => SNumber a n
+pattern SNumber <-
+  ((\x -> reifySNumber x (KnownSNumberDict @a @n)) -> KnownSNumberDict)
+ where
+  SNumber = snumberVal
+{-# COMPLETE SNumber #-}
 
 class LitIsAnything (n :: K.Integer)
 instance ForbidNegZero n => LitIsAnything n
