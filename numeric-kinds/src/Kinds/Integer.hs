@@ -57,7 +57,7 @@ import qualified Prelude as P
 import GHC.Exts (proxy#)
 import GHC.TypeNats (KnownNat, Nat, natVal')
 
-import Kinds.Num (type (+), type (-), Cmp, FromNat)
+import Kinds.Num (type (+), type (-), Cmp, FromNat, ToInteger)
 
 -- | Type-level signed numbers
 data Integer = Pos Nat | Neg Nat
@@ -80,9 +80,6 @@ instance KnownNat n => KnownInteger ('Neg n) where
 type instance Cmp {- k=Integer -} x y = CmpInteger x y
 type instance FromNat {- k=Integer -} n = 'Pos n
 
--- | Type-level conversion to 'Integer'.  Like 'toInteger' in 'Integral'.
-type family ToInteger (n :: k) :: Integer
-type instance ToInteger {- k=Nat -}     n = 'Pos n
 type instance ToInteger {- k=Integer -} n = n
 
 type instance x + y = AddInteger x y

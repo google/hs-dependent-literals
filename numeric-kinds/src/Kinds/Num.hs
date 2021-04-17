@@ -37,7 +37,7 @@ module Kinds.Num
          , type (<), type (<=), type (==), type (/=), type (>=), type (>)
 
            -- * Conversions
-         , FromNat
+         , FromNat, ToInteger
 
            -- * Arithmetic
          , type (+), type (-)
@@ -46,8 +46,12 @@ module Kinds.Num
          , Proven, IsLT, IsLE, IsGT, IsGE, IsEQ, IsNE
          ) where
 
+import Prelude hiding (Integer)
+
 import GHC.TypeNats (CmpNat, Nat)
 import qualified GHC.TypeNats as N (type (+), type (-))
+
+import {-# source #-}  Kinds.Integer (Integer(..))
 
 -- | Type-level Ord "kindclass".
 --
@@ -63,6 +67,11 @@ type instance Cmp {- k=Nat -} x y = CmpNat x y
 type family FromNat (n :: Nat) :: k
 
 type instance FromNat {- k=Nat -} n = n
+
+-- | Type-level conversion to 'Integer'.  Like 'toInteger' in 'Integral'.
+type family ToInteger (n :: k) :: Integer
+
+type instance ToInteger {- k=Nat -} n = 'Pos n
 
 -- | Type-level addition "kindclass".
 type family (x :: k) + (y :: k) :: k
