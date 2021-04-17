@@ -62,8 +62,7 @@ import Kinds.Num (type (+), type (-), Cmp, FromNat, ToInteger)
 -- | Type-level signed numbers
 data Integer = Pos Nat | Neg Nat
 
--- | Mostly internal; used only in implementing 'Data.SNumber.trySNumber' and
--- 'Data.SNumber.KnownSNumber'.
+-- | Mostly internal; the "snumber" package provides more useful functionality.
 class KnownInteger (n :: Integer) where
   integerVal :: P.Integer
 

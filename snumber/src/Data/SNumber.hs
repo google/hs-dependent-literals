@@ -89,22 +89,24 @@ import qualified Kinds.Integer as K (Integer)
 --
 -- * How do you validate that the value is in-bounds for the representation
 --   type?
---   * If by runtime checks, the function name has a "try" infix.
---   * If by trusting the caller blindly, the function name has an "unsafe"
---     prefix and an "Unchecked" infix.
---   * If by type-level bounds checks, the function name has neither of these.
+--
+--     * If by runtime checks, the function name has a "try" infix.
+--     * If by trusting the caller blindly, the function name has an "unsafe"
+--       prefix and an "Unchecked" infix.
+--     * If by type-level bounds checks, the function name has neither of these.
 --
 -- * How do you validate that the runtime Integer value matches the type-level
 --   Integer?
---   * If by trusting the user to pass in the right Integer, the function has
---     an "unsafe" prefix and a "Mk" infix: we're "making" the 'SNumber' from a
---     runtime value rather than deriving it from KnownNat.
---   * If by getting it from a KnownNat instance, the function name doesn't
---     have that infix.
+--
+--     * If by trusting the user to pass in the right Integer, the function has
+--       an "unsafe" prefix and a \"Mk" infix: we're "making" the 'SNumber'
+--       from a runtime value rather than deriving it from KnownNat.
+--     * If by getting it from a KnownNat instance, the function name doesn't
+--       have that infix.
 --
 -- Thus:
 --
--- * 'snumber': type- level checks, safe @KnownNat@.
+-- * 'snumber': type-level checks, safe @KnownNat@.
 -- * 'trySNumber': runtime checks, safe @KnownNat@.
 -- * 'unsafeUncheckedSNumber': no checks, safe @KnownNat@.
 -- * 'unsafeMkSNumber': type-level checks, unsafe @Integer@ parameter.
@@ -266,9 +268,9 @@ unsafeUncheckedSNumber = unsafeUncheckedMkSNumber (fromInteger (integerVal @n))
 -- is in fact the intended use case).
 --
 -- The extra constraint here compared to 'N#' ensures that if you write
--- @unsafeSNumber \@n (fromInteger n)@, the result is either a valid 'SNumber'
--- or a type error.  In particular, the cases this rules out are those where
--- @toInteger (fromInteger n :: a) /= n@ or where
+-- @unsafeMkSNumber \@n (fromInteger n)@, the result is either a valid
+-- 'SNumber' or a type error.  In particular, the cases this rules out are
+-- those where @toInteger (fromInteger n :: a) /= n@ or where
 -- @fromInteger m :: a == fromInteger n@ does not imply @m == n@.
 unsafeMkSNumber :: forall n a. SafeSNumber a n => a -> SNumber a n
 unsafeMkSNumber = N#
