@@ -49,14 +49,20 @@ module Kinds.Integer
          , AddInteger, SubInteger, CmpInteger
          , type (-#)
 
+           -- * Axioms
+         , plusMinusInverseL, plusMinusInverseR
+
            -- * Utility
          , CaseOrdering
          ) where
 
 import Prelude hiding (Integer)
 import qualified Prelude as P
+
+import Data.Type.Equality ((:~:)(..))
 import GHC.Exts (proxy#)
 import GHC.TypeNats (KnownNat, Nat, natVal')
+import Unsafe.Coerce (unsafeCoerce)
 
 import Kinds.Num (type (+), type (-), type (*), Cmp, FromNat, ToInteger)
 
@@ -147,3 +153,14 @@ type family MulInteger m n where
   MulInteger ('Pos m) ('Neg n) = 0 -# (m * n)
   MulInteger ('Neg m) ('Pos n) = 0 -# (m * n)
   MulInteger ('Neg m) ('Neg n) = 'Pos (m * n)
+
+unsafeAxiom :: a :~: b
+unsafeAxiom = unsafeCoerce Refl
+
+-- | Subtracting the right summand gives back the left summand.
+plusMinusInverseR :: (m + n) -# n :~: 'Pos m
+plusMinusInverseR = unsafeAxiom
+
+-- | Subtracting the left summand gives back the right summand.
+plusMinusInverseL :: (m + n) -# m :~: 'Pos n
+plusMinusInverseL = unsafeAxiom
