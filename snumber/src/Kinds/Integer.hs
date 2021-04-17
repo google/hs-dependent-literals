@@ -57,7 +57,8 @@ import qualified GHC.TypeNats as N (type (+), type (-))
 -- | Type-level signed numbers
 data Integer = Pos Nat | Neg Nat
 
--- | Mostly internal; used only in implementing 'trySNumber' and 'KnownSNumber'.
+-- | Mostly internal; used only in implementing 'Data.SNumber.trySNumber' and
+-- 'Data.SNumber.KnownSNumber'.
 class KnownInteger (n :: Integer) where
   integerVal :: P.Integer
 
@@ -71,8 +72,10 @@ instance KnownNat n => KnownInteger ('Neg n) where
           then error "illegal KnownInteger (-0)"
           else negate $ toInteger x
 
--- | Type-level Ord "kindclass".  This has an invisible dependent @k@ parameter
--- that makes the textually-identical instances actually different.  Neat!
+-- | Type-level Ord "kindclass".
+--
+-- This has an invisible dependent @k@ parameter that makes the
+-- textually-identical instances for different kinds actually different.  Neat!
 type family Cmp (x :: k) (y :: k) :: Ordering
 -- That is, this is Cmp {k=Nat} x y.
 type instance Cmp x y = CmpNat x y
@@ -179,7 +182,7 @@ type family CmpInteger m n where
   CmpInteger ('Neg m) ('Pos n) = 'LT
   CmpInteger ('Neg m) ('Neg n) = Cmp n m -- Note: reversed
 
--- | Given two 'Nats' @m@ and @n@, computes @m - n@ as a 'Integer'.
+-- | Given two 'Nat's @m@ and @n@, computes @m - n@ as an 'Integer'.
 type family (m :: Nat) -# (n :: Nat) where
   -- Redundant cases solely to make sure we get stuck reducing '-#' rather
   -- than reducing @CaseOrdering (Cmp m n) tons of junk@ when the magnitude is

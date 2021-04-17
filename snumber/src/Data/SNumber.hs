@@ -12,6 +12,8 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
+-- | Runtime witnesses of type-level integers.
+
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE CPP #-}
@@ -60,6 +62,8 @@ import qualified Kinds.Integer as K (Integer)
 
 #include "MachDeps.h"
 
+-- | @SNumber a n@ is a runtime representation of the value of @n@.
+--
 -- For @N# n :: SNumber a n@ and @N# m :: SNumber a m@, the following must hold:
 --
 -- * @n ~ m@ iff @n == m@ (according to the 'Eq' instance of @a@).
@@ -75,7 +79,7 @@ import qualified Kinds.Integer as K (Integer)
 -- Note that the first requirement means that you must never construct
 -- @N# 0 :: SNumber _ ('Neg 0)@, because that would prove that
 -- @'Neg 0 ~ 'Pos 0@.  In practice, we largely ignore the existence of
--- @'Neg 0@: 'TrySNumber' (and, by extension, the instance derivation via
+-- @'Neg 0@: 'trySNumber' (and, by extension, the instance derivation via
 -- 'KnownInteger') will throw a runtime error when trying to construct
 -- @'Neg 0@, and 'SafeSNumber' instances explicitly exclude @'Neg 0@ with
 -- type-level checks.
@@ -100,7 +104,7 @@ import qualified Kinds.Integer as K (Integer)
 --
 -- Thus:
 --
--- * 'snumber': type-level checks, safe @KnownNat@.
+-- * 'snumber': type- level checks, safe @KnownNat@.
 -- * 'trySNumber': runtime checks, safe @KnownNat@.
 -- * 'unsafeUncheckedSNumber': no checks, safe @KnownNat@.
 -- * 'unsafeMkSNumber': type-level checks, unsafe @Integer@ parameter.
@@ -113,8 +117,10 @@ import qualified Kinds.Integer as K (Integer)
 -- using 'trySNumber', and of course it can be solved from a matching instance
 -- in the function's context (which compiles to an @a@ parameter for
 -- @KnownSNumber a n@).
---
--- Note: we must be extremely careful to prevent
+newtype SNumber a (n :: K.Integer) = MkSNumber# a
+  deriving newtype Show
+
+-- Note: we must be extremely careful to prevent GHC from solving
 -- @Data.Coerce.Coercible (SNumber m) (SNumber n)@.  Given two applications of
 -- the same type constructor @X m@ and @X n@, there are three ways GHC might
 -- solve this constraint:
@@ -137,8 +143,6 @@ import qualified Kinds.Integer as K (Integer)
 --   and nominal doesn't matter in practice, because GHC will never solve
 --   @Coercible {Integer} m n@ anyway.  But we set it to nominal just because
 --   that feels more right.
-newtype SNumber a (n :: K.Integer) = MkSNumber# a
-  deriving newtype Show
 
 -- The 'Type' parameter needs to have nominal role, because coercing between
 -- types with different Eq/Ord instances is unsafe.
@@ -147,9 +151,11 @@ newtype SNumber a (n :: K.Integer) = MkSNumber# a
 -- 'Integer' parameter.
 type role SNumber nominal nominal
 
--- This pattern is identical to the MkSNumber# constructor except that it isn't
--- a newtype constructor, so having it in scope doesn't allow coercions across
--- SNumber types.
+-- | Create an 'SNumber' for @n@, with no safety measures whatsoever.
+--
+-- This pattern is identical to the newtype constructor of 'SNumber' except
+-- that it isn't actualy a newtype constructor, so having it in scope doesn't
+-- allow unsound coercions across 'SNumber' types.
 pattern N# :: forall (n :: K.Integer) a. a -> SNumber a n
 pattern N# {unSNumber} = MkSNumber# unSNumber
 {-# COMPLETE N# #-}
@@ -190,20 +196,28 @@ instance ( IsAtLeastMinBound
 type LitIsNonNegative repr a =
   IsAtLeastMinBound ('Pos 0) (NegativeReprUnsignedErr repr a)
 
+-- | The number of bits in the present system's 'Word' type.
 type WordBits = WORD_SIZE_IN_BITS
+
+-- | One more than the largest representable 'Word' value.
 type WordMaxP1 = 'Pos (2 ^ WordBits)
 
+-- | The number of bits in the present system's 'Int' type.
 type IntBits = WORD_SIZE_IN_BITS
+
+-- | The smallest representable 'Int' value.
 type IntMin = 'Neg (2 ^ (IntBits - 1))
+
+-- | One more than the largest representable 'Int' value.
 type IntMaxP1 = 'Pos (2 ^ (IntBits - 1))
 
+-- | The class of types that are suitable for use as integer value witnesses.
+--
+-- Implementing an instance of this class amounts to asserting that the type
+-- and its 'Integral', 'Ord', and 'Eq' instances uphold the requirements of
+-- 'SNumber', for any integer @n@ that satisfies @SafeSNumber a n@.
 class Integral a => SNumberRepr a where
-  -- | @SafeSNumber a n@ witnesses that @N# n@ is a valid @SNumber a n@.
-  --
-  -- This not only ensures that the given 'Integer' is within the type's
-  -- representable range, but also comes with guarantees about its 'Num',
-  -- 'Integral', 'Eq', and 'Ord' instances, as described in the documentation
-  -- of 'SNumber'.
+  -- | @SafeSNumber a n@ witnesses that @'N#' n@ is a valid @'SNumber' a n@.
   type SafeSNumber a :: K.Integer -> Constraint
 
 instance SNumberRepr Int where
@@ -245,7 +259,7 @@ trySNumber = unsafeTryMkSNumber (integerVal @n)
 unsafeUncheckedSNumber :: forall n a. (Num a, KnownInteger n) => SNumber a n
 unsafeUncheckedSNumber = unsafeUncheckedMkSNumber (fromInteger (integerVal @n))
 
--- | Semi-safely construct an N#.
+-- | Semi-safely construct an 'SNumber' as if by 'N#'.
 --
 -- Callers must ensure that the @a@ argument is @fromInteger (integerVal @n)@
 -- (semantically, not syntactically: @unsafeSNumber @('Pos 42) 42@ is fine and
@@ -261,8 +275,8 @@ unsafeMkSNumber = N#
 
 -- | Create an 'SNumber' for @n@, if it's faithfully represented by @a@.
 --
--- As with 'snumber', this trusts you to pass @integerVal @n@, and violating
--- that will lead to type unsoundness.
+-- As with 'unsafeMkSNumber', this trusts you to pass @integerVal \@n@, and
+-- violating that will lead to type unsoundness.
 --
 -- This tests at runtime whether @a@ represents @n@ correctly.
 unsafeTryMkSNumber
@@ -276,7 +290,7 @@ unsafeTryMkSNumber x =
 unsafeUncheckedMkSNumber :: forall n a. a -> SNumber a n
 unsafeUncheckedMkSNumber = N#
 
--- | Like 'KnownNat', but represented by 'a' instead of 'Natural'.
+-- | Like 'KnownNat', but represented by @a@ instead of 'Natural'.
 --
 -- This is currently solved automatically from 'KnownNat' via runtime checks,
 -- to ease migration (we can incrementally strengthen 'KnownNat' constraints to
@@ -313,6 +327,7 @@ snumberVal = snumberVal_
 
 -- TODO(awpr): Expose these functions as GEq/GOrd instances.
 
+-- | Ordering results carrying evidence of type-level ordering relations.
 data SOrdering m n where
   SLT :: CmpInteger m n ~ 'LT => SOrdering m n
   -- | This doesn't currently prove m ~ n, but since we've forbidden SNumbers
