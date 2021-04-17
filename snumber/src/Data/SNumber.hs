@@ -36,11 +36,24 @@
 {-# LANGUAGE UndecidableInstances #-}
 
 module Data.SNumber
-  ( SNumber(N#, unSNumber), SNumberRepr(..)
+  ( -- * SNumber
+    SNumber(N#, unSNumber), SNumberRepr(..)
+
+    -- ** Creation
   , snumber, trySNumber, unsafeUncheckedSNumber
   , unsafeMkSNumber, unsafeTryMkSNumber, unsafeUncheckedMkSNumber
-  , SOrdering(..), compareSNumber, sameSNumber, withSNumber, withSNumberAsNat
+
+    -- ** Existentials
+  , SomeSNumber(..), someSNumberVal, withSNumber
+
+    -- ** Comparison
+  , SOrdering(..), compareSNumber, sameSNumber
+
+    -- ** Reification to Constraints
   , KnownSNumber(..), snumberVal
+  , reifySNumber, reifySNumberAsNat
+
+    -- * Miscellaneous
   , IntBits, IntMin, IntMaxP1
   , WordBits, WordMaxP1
   ) where
@@ -70,7 +83,7 @@ import qualified Kinds.Integer as K (Integer)
 -- * @CmpInteger m n ~ 'LT@ iff @compare m n == LT@ (according to 'Ord').
 -- * @CmpInteger m n ~ 'EQ@ iff @compare m n == EQ@.
 -- * @CmpInteger m n ~ 'GT@ iff @compare m n == GT@.
--- * if @n ~ 'Pos n'@, then @fromIntegral n == natVal' @n' proxy#@.
+-- * @toInteger n == integerVal \@n@
 --
 -- These are exactly the set of things we're willing to 'unsafeCoerce' proofs
 -- for.  It is /unsafe/ to construct an 'SNumber' that violates these by any
@@ -218,6 +231,11 @@ type IntMaxP1 = 'Pos (2 ^ (IntBits - 1))
 -- Implementing an instance of this class amounts to asserting that the type
 -- and its 'Integral', 'Ord', and 'Eq' instances uphold the requirements of
 -- 'SNumber', for any integer @n@ that satisfies @SafeSNumber a n@.
+--
+-- Furthermore, it requires that every value of @a@ is an integer, i.e. that
+-- @forall x :: a. exists y :: Integer. x == fromInteger y, toInteger x == y@.
+-- This ensures we can wrap any @a@ in @SomeSNumberVal@ and be sure it
+-- corresponds to a valid @K.Integer@.
 class Integral a => SNumberRepr a where
   -- | @SafeSNumber a n@ witnesses that @'N#' n@ is a valid @'SNumber' a n@.
   type SafeSNumber a :: K.Integer -> Constraint
@@ -354,16 +372,30 @@ sameSNumber (N# x) (N# y)
 newtype c :=> a = CArr (c => a)
 
 -- | Stash an 'SNumber' at the type level as a 'KnownSNumber' instance.
-withSNumber :: forall a n r. SNumber a n -> (KnownSNumber a n => r) -> r
-withSNumber n r = f n
+reifySNumber :: forall a n r. SNumber a n -> (KnownSNumber a n => r) -> r
+reifySNumber n r = f n
  where
   f :: SNumber a n -> r
   f = unsafeCoerce (CArr r :: KnownSNumber a n :=> r)
 
 -- | Use a positive 'SNumber' to introduce a 'KnownNat' instance.
-withSNumberAsNat
+reifySNumberAsNat
   :: forall n r a
    . Integral a
   => SNumber a ('Pos n) -> (KnownNat n => r) -> r
-withSNumberAsNat (N# x) r = case someNatVal (fromIntegral x) of
+reifySNumberAsNat (N# x) r = case someNatVal (fromIntegral x) of
   SomeNat (_ :: Proxy m) -> case unsafeCoerce Refl :: n :~: m of Refl -> r
+
+-- | An 'SNumber' with an existential 'K.Integer' type parameter.
+data SomeSNumber a = forall n. SomeSNumber (SNumber a n)
+
+-- | Create an @'SNumber' a@ from any value of type @a@.
+--
+-- Since 'SNumberRepr' guarantees every @a@ value is an integer, we can freely
+-- wrap up a value in an 'SNumber' with existential 'K.Integer' type parameter.
+someSNumberVal :: SNumberRepr a => a -> SomeSNumber a
+someSNumberVal x = withSNumber x SomeSNumber
+
+-- | Like 'someSNumberVal', but in quantified CPS style rather than GADT style.
+withSNumber :: SNumberRepr a => a -> (forall n. SNumber a n -> r) -> r
+withSNumber x r = r (N# x)
