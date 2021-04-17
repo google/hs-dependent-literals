@@ -16,3 +16,4 @@ resolver: lts-17.9
 
 packages:
 - snumber
+- numeric-kinds

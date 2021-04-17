@@ -4,17 +4,15 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 5ca533a51984af98bf4756a9f1591b379ded992ec01ee91e33bd61b6fcf67fbb
+-- hash: bb820675192339fe9a7ff0cc2994ddb3e37a82d8c9ff9bc1c912072e04eb0e85
 
-name:           snumber
+name:           numeric-kinds
 version:        0.1.0.0
-synopsis:       Indexed numeric types linking type-level and value-level numbers.
-description:    This provides singletons-style witnesses for type-level integers, and some
-                limited arithmetic operations on them.  Instead of working with (invisible,
-                implicitly-passed) 'KnownNat' instances, you can work with (visible,
-                explicitly-mentioned) 'SNumber' values, and can freely convert between the
-                two forms.
-category:       Constraints
+synopsis:       Type-level numeric types, classes, and instances.
+description:    This provides numeric types meant for use at the type level with -XDataKinds,
+                along with type families that act like type-level typeclasses providing
+                various operations.
+category:       Numeric
 homepage:       https://github.com/google/hs-dependent-literals#readme
 bug-reports:    https://github.com/google/hs-dependent-literals/issues
 author:         Andrew Pritchard <awpr@google.com>
@@ -28,18 +26,16 @@ extra-source-files:
 source-repository head
   type: git
   location: https://github.com/google/hs-dependent-literals
-  subdir: snumber
+  subdir: numeric-kinds
 
 library
   exposed-modules:
-    Data.SNumber
+    Kinds.Integer
   other-modules:
-    Data.SNumber.Internal
-    Paths_snumber
+    Paths_numeric_kinds
   hs-source-dirs:
     src
   ghc-options: -Wall -Werror
   build-depends:
-    base,
-    numeric-kinds
+    base
   default-language: Haskell2010

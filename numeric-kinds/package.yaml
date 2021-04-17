@@ -12,21 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: snumber
+name: numeric-kinds
 version: 0.1.0.0
-category: Constraints
-synopsis: Indexed numeric types linking type-level and value-level numbers.
+category: Numeric
+synopsis: Type-level numeric types, classes, and instances.
 description: |
-  This provides singletons-style witnesses for type-level integers, and some
-  limited arithmetic operations on them.  Instead of working with (invisible,
-  implicitly-passed) 'KnownNat' instances, you can work with (visible,
-  explicitly-mentioned) 'SNumber' values, and can freely convert between the
-  two forms.
+  This provides numeric types meant for use at the type level with -XDataKinds,
+  along with type families that act like type-level typeclasses providing
+  various operations.
 license: Apache-2.0
 author: Andrew Pritchard <awpr@google.com>
 copyright: 2020-2021 Google LLC
 maintainer: Andrew Pritchard <awpr@google.com>
-github: google/hs-dependent-literals/snumber
+github: google/hs-dependent-literals/numeric-kinds
 
 # Note: this causes CHANGELOG.md to be included in Hackage distributions.
 extra-source-files:
@@ -36,9 +34,8 @@ ghc-options: -Wall -Werror
 
 dependencies:
   - base
-  - numeric-kinds
 
 library:
   source-dirs: src
   exposed-modules:
-    - Data.SNumber
+    - Kinds.Integer
