@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: bb820675192339fe9a7ff0cc2994ddb3e37a82d8c9ff9bc1c912072e04eb0e85
+-- hash: 73f519bf612baf4b84529efefd1f8a787c4e8f3b651f052a2d48bac842966c2e
 
 name:           numeric-kinds
 version:        0.1.0.0
@@ -31,6 +31,7 @@ source-repository head
 library
   exposed-modules:
     Kinds.Integer
+    Kinds.Num
   other-modules:
     Paths_numeric_kinds
   hs-source-dirs:

@@ -39,3 +39,4 @@ library:
   source-dirs: src
   exposed-modules:
     - Kinds.Integer
+    - Kinds.Num

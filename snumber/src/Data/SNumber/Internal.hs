@@ -17,6 +17,7 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE PatternSynonyms #-}
+{-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -31,10 +32,8 @@ import Data.Kind (Constraint, Type)
 import GHC.TypeLits (TypeError, ErrorMessage(..))
 
 import Prelude hiding (Integer) -- No term-level stuff in this module anyway.
-import Kinds.Integer
-         ( type (-), type (<?), type (>=?)
-         , Reduce, Cmp, Integer(..)
-         )
+import Kinds.Integer (Integer(..))
+import Kinds.Num (type (-), type (<?), type (>=?), Cmp)
 
 type family ShowNum (n :: Integer) where
   ShowNum ('Pos n) = 'ShowType n
@@ -78,6 +77,13 @@ type family AssertLessThanMaxBound
     (maxp1 :: Integer)
     (err :: Constraint) where
   AssertLessThanMaxBound '() n maxp1 err = Assert (n <? maxp1) err
+
+type family Reduce (x :: k) :: ()
+type instance Reduce 'LT = '()
+type instance Reduce 'EQ = '()
+type instance Reduce 'GT = '()
+type instance Reduce 'True = '()
+type instance Reduce 'False = '()
 
 class IsLessThanMaxBound
         (maxp1 :: Integer)

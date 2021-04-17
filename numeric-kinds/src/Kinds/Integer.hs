@@ -12,7 +12,7 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
--- | Type-level 'Integer', and type-level 'Ord' and 'Num'.
+-- | Type-level 'Integer'.
 --
 -- Import Integer qualified as K and refer to it as K.Integer.
 --
@@ -38,21 +38,26 @@
 {-# LANGUAGE UndecidableInstances #-}
 
 module Kinds.Integer
-         ( Integer(..), KnownInteger(..)
-         , IfLT, IfGE, IsGE
-         , ToInteger
-         , type (-), type (+), type (-#)
+         ( -- * Type-level Integers
+           Integer(..), ToInteger
 
-         , CmpInteger, Cmp, Reduce
-         , type (<), type (<=), type (==), type (/=), type (>=), type (>)
-         , type (<?), type (<=?), type (==?), type (/=?), type (>=?), type (>?)
+           -- ** Runtime Values
+         , KnownInteger(..)
+
+           -- ** Specialized Arithmetic and Comparison
+         , AddInteger, SubInteger, CmpInteger
+         , type (-#)
+
+           -- * Utility
+         , CaseOrdering
          ) where
 
 import Prelude hiding (Integer)
 import qualified Prelude as P
 import GHC.Exts (proxy#)
-import GHC.TypeNats (CmpNat, KnownNat, Nat, natVal')
-import qualified GHC.TypeNats as N (type (+), type (-))
+import GHC.TypeNats (KnownNat, Nat, natVal')
+
+import Kinds.Num (type (+), type (-), Cmp, FromNat)
 
 -- | Type-level signed numbers
 data Integer = Pos Nat | Neg Nat
@@ -72,108 +77,19 @@ instance KnownNat n => KnownInteger ('Neg n) where
           then error "illegal KnownInteger (-0)"
           else negate $ toInteger x
 
--- | Type-level Ord "kindclass".
---
--- This has an invisible dependent @k@ parameter that makes the
--- textually-identical instances for different kinds actually different.  Neat!
-type family Cmp (x :: k) (y :: k) :: Ordering
--- That is, this is Cmp {k=Nat} x y.
-type instance Cmp x y = CmpNat x y
--- And this is Cmp {k=Integer} x y.
-type instance Cmp x y = CmpInteger x y
-
--- | Type-level numeric conversion "kindclass".  Like 'fromInteger' in 'Num'
-type family FromNat (n :: Nat) :: k
-type instance FromNat {- k=Nat -}     n = n
+type instance Cmp {- k=Integer -} x y = CmpInteger x y
 type instance FromNat {- k=Integer -} n = 'Pos n
 
--- | Type-level numeric conversion "kindclass".  Like 'toInteger' in 'Integral'
+-- | Type-level conversion to 'Integer'.  Like 'toInteger' in 'Integral'.
 type family ToInteger (n :: k) :: Integer
 type instance ToInteger {- k=Nat -}     n = 'Pos n
 type instance ToInteger {- k=Integer -} n = n
 
--- | Type-level addition "kindclass".  See 'Cmp' above.
-type family (x :: k) + (y :: k) :: k
-type instance x + y = (N.+) x y  -- HLint doesn't like qualified TypeOperators.
 type instance x + y = AddInteger x y
 
--- | Type-level subtraction "kindclass".  See 'Cmp' above.
-type family (x :: k) - (y :: k) :: k
-type instance x - y = (N.-) x y
 type instance x - y = SubInteger x y
 
-type family Reduce (x :: k) :: ()
-type instance Reduce 'LT = '()
-type instance Reduce 'EQ = '()
-type instance Reduce 'GT = '()
-type instance Reduce 'True = '()
-type instance Reduce 'False = '()
-
-type family Not b where
-  Not 'True = 'False
-  Not 'False = 'True
-
-infix 4 <?, >?, <=?, >=?, ==?, /=?
-
-type x <?  y = IsLT (Cmp x y)
-type x >?  y = IsGT (Cmp x y)
-type x <=? y = IsLE (Cmp x y)
-type x >=? y = IsGE (Cmp x y)
-type x ==? y = IsEQ (Cmp x y)
-type x /=? y = IsNE (Cmp x y)
-
-type Proven b = b ~ 'True
-
-infix 4 <, >, <=, >=, ==, /=
-
-type x <  y = Cmp x y ~ 'LT
-type x >  y = Cmp x y ~ 'GT
-type x == y = Cmp x y ~ 'EQ
-type x <= y = Proven (x <=? y)
-type x >= y = Proven (x >=? y)
-type x /= y = Proven (x /=? y)
-
-type family CaseOrdering (o :: Ordering) (lt :: k) (eq :: k) (gt :: k) :: k where
-  CaseOrdering 'LT lt eq gt = lt
-  CaseOrdering 'EQ lt eq gt = eq
-  CaseOrdering 'GT lt eq gt = gt
-
-type family IsLT o where
-  IsLT 'LT = 'True
-  IsLT o   = 'False
-
-type family IsLE o where
-  IsLE 'GT = 'False
-  IsLE o   = 'True
-
-type family IsGT o where
-  IsGT 'GT = 'True
-  IsGT o   = 'False
-
-type family IsGE o where
-  IsGE 'LT = 'False
-  IsGE o   = 'True
-
-type family IsEQ o where
-  IsEQ 'EQ = 'True
-  IsEQ o   = 'False
-
-type family IsNE o where
-  IsNE 'EQ = 'False
-  IsNE o   = 'True
-
-type family IfLT (o :: Ordering) (lt :: k) (ge :: k) :: k where
-  IfLT 'LT lt ge = lt
-  IfLT 'EQ lt ge = ge
-  IfLT 'GT lt ge = ge
-
-type family IfEQ (o :: Ordering) (eq :: k) (ne :: k) :: k where
-  IfEQ 'LT eq ne = ne
-  IfEQ 'EQ eq ne = eq
-  IfEQ 'GT eq ne = ne
-
-type IfGE o ge lt = IfLT o lt ge
-
+-- | Comparison of type-level integers.
 type family CmpInteger m n where
   CmpInteger ('Pos m) ('Pos n) = Cmp m n
   CmpInteger ('Pos 0) ('Neg 0) = 'EQ
@@ -181,6 +97,16 @@ type family CmpInteger m n where
   CmpInteger ('Neg 0) ('Pos 0) = 'EQ
   CmpInteger ('Neg m) ('Pos n) = 'LT
   CmpInteger ('Neg m) ('Neg n) = Cmp n m -- Note: reversed
+
+-- | Type-level eliminator for 'Ordering'.
+--
+-- @CaseOrdering o lt eq gt@ selects from among @lt@, @eq@, and @gt@ according
+-- to @o@.  This is primarily exported so Haddock doesn't complain about being
+-- unable to link it when it's mentioned in type instance clauses.
+type family CaseOrdering (o :: Ordering) (lt :: k) (eq :: k) (gt :: k) :: k where
+  CaseOrdering 'LT lt eq gt = lt
+  CaseOrdering 'EQ lt eq gt = eq
+  CaseOrdering 'GT lt eq gt = gt
 
 -- | Given two 'Nat's @m@ and @n@, computes @m - n@ as an 'Integer'.
 type family (m :: Nat) -# (n :: Nat) where
@@ -198,12 +124,14 @@ type family (m :: Nat) -# (n :: Nat) where
     ('Pos 0)
     ('Pos (m - n))
 
+-- | Addition of type-level integers.
 type family AddInteger m n where
   AddInteger ('Pos m) ('Pos n) = 'Pos (m + n)
   AddInteger ('Pos m) ('Neg n) = m -# n
   AddInteger ('Neg m) ('Pos n) = n -# m
   AddInteger ('Neg m) ('Neg n) = 'Neg (m + n)
 
+-- | Subtraction of type-level integers.
 type family SubInteger m n where
   -- Note we could define this as @AddInteger m (Negate n)@, but then GHC would
   -- reduce eagerly to this when the parameters are type variables, and
