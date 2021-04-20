@@ -51,7 +51,7 @@ library:
     - DependentLiterals.Plugin
   dependencies:
     - ghc >= 8.6 && < 9.1
-    - syb
+    - syb >= 0.1 && < 0.8
 
 _test-template: &test-template
   main: Main.hs
