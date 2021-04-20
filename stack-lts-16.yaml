@@ -16,7 +16,7 @@ resolver: lts-16.31
 
 packages:
 - dependent-literals
-# - dependent-literals-plugin
+- dependent-literals-plugin
 - numeric-kinds
 - snumber
 

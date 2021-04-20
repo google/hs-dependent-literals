@@ -12,7 +12,9 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -48,13 +50,23 @@ import HsSyn
          )
 import HsTypes
          ( HsType(HsAppTy, HsParTy, HsTyLit, HsTyVar)
-         , Promoted(..), LHsType, HsConDetails(PrefixCon)
+         , LHsType, HsConDetails(PrefixCon)
          )
 import HsUtils (nlHsVar, nlHsApp)
 import Module (ModuleName, mkModuleName)
 import OccName (OccName, mkTcOcc, mkVarOcc, mkDataOcc)
 import Outputable ((<+>), Outputable, nest, pprPrec, sep, showSDoc, text)
 import RdrName (RdrName, mkRdrQual, mkRdrUnqual)
+
+#if MIN_VERSION_ghc(8,8,0)
+import BasicTypes (PromotionFlag(..))
+#else
+import GhcPlugins (noLoc)
+import HsTypes (Promoted(..))
+type PromotionFlag = Promoted
+pattern IsPromoted :: PromotionFlag
+pattern IsPromoted = Promoted
+#endif
 
 data Config = Config
   { _cDoLiterals :: Bool
@@ -91,6 +103,19 @@ parsedResultPlugin cfg m = do
 when_ :: Applicative f => Bool -> (a -> f a) -> a -> f a
 when_ True f = f
 when_ False _ = pure
+
+pattern LPat :: Pat p -> LPat p
+#if MIN_VERSION_ghc(8,8,0)
+pattern LPat pat = pat
+#else
+pattern LPat pat <- L _ pat
+#endif
+
+nlPat :: Pat p -> LPat p
+nlPat = id
+#if !MIN_VERSION_ghc(8,8,0)
+  . noLoc
+#endif
 
 transformParsed
   :: Config
@@ -170,7 +195,15 @@ transformParsed Config{..} df' (L modLoc HsModule{..}) = do
 
   infixl 4 `mkHsAppType`
   mkHsAppType :: LHsExpr GhcPs -> LHsType GhcPs -> HsExpr GhcPs
-  mkHsAppType expr ty = HsAppType (HsWC NoExt ty) expr
+  mkHsAppType expr ty = HsAppType
+#if MIN_VERSION_ghc(8,8,0)
+    NoExt
+    expr
+    (HsWC NoExt ty)
+#else
+    (HsWC NoExt ty)
+    expr
+#endif
 
   infixl 4 `nlHsAppType`
   nlHsAppType :: LHsExpr GhcPs -> LHsType GhcPs -> LHsExpr GhcPs
@@ -181,7 +214,7 @@ transformParsed Config{..} df' (L modLoc HsModule{..}) = do
 
   litToTyLit :: IntegralLit -> LHsType GhcPs
   litToTyLit (IL txt neg val) = nl $ HsParTy NoExt $ nl $ HsAppTy NoExt
-    (nl $ HsTyVar NoExt Promoted $ nl (if neg then negName else posName))
+    (nl $ HsTyVar NoExt IsPromoted $ nl (if neg then negName else posName))
     (nl $ HsTyLit NoExt (HsNumTy txt (abs val)))
 
   debug :: String -> Hsc ()
@@ -243,7 +276,7 @@ transformParsed Config{..} df' (L modLoc HsModule{..}) = do
   transformExp _ = Nothing
 
   transformPat :: LPat GhcPs -> Maybe (LPat GhcPs)
-  transformPat (L l (NPat _ (L _ (OverLit _ (HsIntegral il) witness)) negation _)) =
+  transformPat (LPat (NPat _ (L l (OverLit _ (HsIntegral il) witness)) negation _)) =
     let il' = fuseNegation (isJust negation) il
 
         -- Wrapper application of match# to the LitRepr.
@@ -253,7 +286,7 @@ transformParsed Config{..} df' (L modLoc HsModule{..}) = do
             `nlHsApp_` buildReprLit l il' witness
             `nlHsApp_` buildReprLit l il' witness
 
-    in  Just $ nl $ ViewPat NoExt
-          wrappedLit
-          (nl $ ConPatIn (nl cjustConName) (PrefixCon []))
+    in  Just $ nlPat $ ViewPat NoExt
+            wrappedLit
+            (nlPat $ ConPatIn (nl cjustConName) (PrefixCon []))
   transformPat _ = Nothing
