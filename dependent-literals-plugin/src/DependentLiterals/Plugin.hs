@@ -28,13 +28,44 @@ import Data.Maybe (fromMaybe, isJust)
 
 import qualified Data.Generics as SYB
 
+-- GHC has been overhauling its module hierarchy, but to a significant extent,
+-- it's renaming modules entirely and not regrouping exports; most of these we
+-- paper over by defining macros for their most-up-to-date name with
+-- underscores instead of dots.
+
+-- This one was renamed twice in the range of supported versions.
+#if MIN_VERSION_ghc(9,0,0)
+#define GHC_Hs_Type GHC.Hs.Type
+#elif MIN_VERSION_ghc(8,10,0)
+#define GHC_Hs_Type GHC.Hs.Types
+#else
+#define GHC_Hs_Type HsTypes
+#endif
+
+-- Renames from 8.10 to 9.0
+#if MIN_VERSION_ghc(9,0,0)
+#define GHC_Plugins GHC.Plugins
+#define GHC_Types_SourceText GHC.Types.Basic
+#define GHC_Types_Name_Occurrence GHC.Types.Name.Occurrence
+#define GHC_Types_Name_Reader GHC.Types.Name.Reader
+#define GHC_Unit_Module_Name GHC.Unit.Module.Name
+#define GHC_Utils_Outputable GHC.Utils.Outputable
+#else
+#define GHC_Plugins GhcPlugins
+#define GHC_Types_SourceText BasicTypes
+#define GHC_Types_Name_Occurrence OccName
+#define GHC_Types_Name_Reader RdrName
+#define GHC_Unit_Module_Name Module
+#define GHC_Utils_Outputable Outputable
+#endif
+
+-- Renames from 8.8 to 8.10
 #if MIN_VERSION_ghc(8,10,0)
 #define GHC_Hs GHC.Hs
 #define GHC_Hs_Expr GHC.Hs.Expr
 #define GHC_Hs_Extension GHC.Hs.Extension
 #define GHC_Hs_Lit GHC.Hs.Lit
 #define GHC_Hs_Pat GHC.Hs.Pat
-#define GHC_Hs_Types GHC.Hs.Types
 #define GHC_Hs_Utils GHC.Hs.Utils
 #else
 #define GHC_Hs HsSyn
@@ -42,12 +73,24 @@ import qualified Data.Generics as SYB
 #define GHC_Hs_Extension HsExtension
 #define GHC_Hs_Lit HsLit
 #define GHC_Hs_Pat HsPat
-#define GHC_Hs_Types HsTypes
 #define GHC_Hs_Utils HsUtils
 #endif
 
-import BasicTypes (IntegralLit(IL), SourceText(NoSourceText))
-import GhcPlugins
+import GHC_Hs
+         ( HsModule(..), HsWildCardBndrs(HsWC)
+         , HsTyLit(HsNumTy)
+         , ImportDecl(..), IEWrappedName(..), IE(..)
+         )
+import GHC_Hs_Lit (HsOverLit(..), OverLitVal(HsIntegral))
+import GHC_Hs_Expr (HsExpr(HsAppType, HsOverLit, HsApp, NegApp), LHsExpr)
+import GHC_Hs_Extension (GhcPs, GhcPass)
+import GHC_Hs_Type
+         ( HsType(HsAppTy, HsParTy, HsTyLit, HsTyVar)
+         , LHsType, HsConDetails(PrefixCon)
+         )
+import GHC_Hs_Pat (LPat, Pat(NPat, ViewPat))
+import GHC_Hs_Utils (nlHsVar, nlHsApp)
+import GHC_Plugins
          ( Hsc, HsParsedModule(..)
          , Plugin(parsedResultAction, pluginRecompile), defaultPlugin
          , PluginRecompile(NoForceRecompile)
@@ -57,40 +100,60 @@ import GhcPlugins
          , gopt_set, GeneralFlag(Opt_SuppressModulePrefixes)
          , SrcSpan
          )
-import GHC_Hs
-         ( HsModule(..), HsWildCardBndrs(HsWC)
-         , HsTyLit(HsNumTy)
-         , ImportDecl(..), IEWrappedName(..), IE(..)
+import GHC_Types_Name_Occurrence (OccName, mkTcOcc, mkVarOcc, mkDataOcc)
+import GHC_Types_Name_Reader (RdrName, mkRdrQual, mkRdrUnqual)
+import GHC_Types_SourceText (IntegralLit(IL), SourceText(NoSourceText))
+import GHC_Unit_Module_Name (ModuleName, mkModuleName)
+import GHC_Utils_Outputable
+         ( (<+>), Outputable, nest, pprPrec, sep, showSDoc, text
          )
-import GHC_Hs_Lit (HsOverLit(..), OverLitVal(HsIntegral))
-import GHC_Hs_Expr (HsExpr(HsAppType, HsOverLit, HsApp, NegApp), LHsExpr)
-import GHC_Hs_Extension (GhcPs, GhcPass)
-import GHC_Hs_Types
-         ( HsType(HsAppTy, HsParTy, HsTyLit, HsTyVar)
-         , LHsType, HsConDetails(PrefixCon)
-         )
-import GHC_Hs_Pat (LPat, Pat(ConPatIn, NPat, ViewPat))
-import GHC_Hs_Utils (nlHsVar, nlHsApp)
-import Module (ModuleName, mkModuleName)
-import OccName (OccName, mkTcOcc, mkVarOcc, mkDataOcc)
-import Outputable ((<+>), Outputable, nest, pprPrec, sep, showSDoc, text)
-import RdrName (RdrName, mkRdrQual, mkRdrUnqual)
+
+-- For semantic changes, we generally try to paper over them by adding
+-- compatibility shims, e.g. pattern synonyms, to make the code below look like
+-- it's targeting the most-up-to-date version.
+
+#if MIN_VERSION_ghc(9,0,0)
+import GHC_Hs_Pat (Pat(ConPat))
+import GHC.Unit.Types (IsBootInterface(..))
+#else
+-- Imports for pre-9.0 compatibily shims.
+import GHC_Hs_Pat (Pat(ConPatIn), HsConPatDetails)
+import GHC_Hs_Extension (IdP)
+#endif
 
 #if MIN_VERSION_ghc(8,10,0)
 import GHC.Hs.Extension (NoExtField(..))
 import GHC.Hs.ImpExp (ImportDeclQualifiedStyle(..))
-import GhcPlugins (noLoc)
+import GHC_Plugins (noLoc)
 #else
+-- Imports for pre-8.10 compatibily shims.
 import HsExtension (NoExt(..))
 #endif
 
 #if MIN_VERSION_ghc(8,8,0)
-import BasicTypes (PromotionFlag(..))
+import GHC_Types_SourceText (PromotionFlag(..))
 #else
-import GhcPlugins (noLoc)
+-- Imports for pre-8.8 compatibily shims.
+import GHC_Plugins (noLoc)
 import HsTypes (Promoted(..))
 #endif
 
+-- Pre-9.0 compatibility shims.
+#if !MIN_VERSION_ghc(9,0,0)
+pattern ConPat :: a -> Located (IdP p) -> HsConPatDetails p -> Pat p
+pattern ConPat ext con args <- (((,) NoExtField) -> (ext, ConPatIn con args))
+ where
+  ConPat _ext con args = ConPatIn con args
+
+type HsModulePs = HsModule GhcPs
+
+pattern NotBoot :: Bool
+pattern NotBoot = False
+#else
+type HsModulePs = HsModule
+#endif
+
+-- Pre-8.10 compatibility shims.
 #if !MIN_VERSION_ghc(8,10,0)
 type NoExtField = NoExt
 pattern NoExtField :: NoExt
@@ -102,6 +165,7 @@ pattern QualifiedPre = True
 pattern NotQualified = False
 #endif
 
+-- Pre-8.8 compatibility shims.
 #if !MIN_VERSION_ghc(8,8,0)
 type PromotionFlag = Promoted
 pattern IsPromoted :: PromotionFlag
@@ -160,8 +224,8 @@ nlPat = id
 transformParsed
   :: Config
   -> DynFlags
-  -> Located (HsModule GhcPs)
-  -> Hsc (Located (HsModule GhcPs))
+  -> Located HsModulePs
+  -> Hsc (Located HsModulePs)
 transformParsed Config{..} df' (L modLoc HsModule{..}) = do
   decls <-
     pure hsmodDecls
@@ -197,7 +261,7 @@ transformParsed Config{..} df' (L modLoc HsModule{..}) = do
     NoSourceText
     (nl nm)
     Nothing -- no package qualifier
-    False -- not SOURCE
+    NotBoot
     False -- not marked safe
     q -- qualified
     True -- implicit
@@ -328,5 +392,5 @@ transformParsed Config{..} df' (L modLoc HsModule{..}) = do
 
     in  Just $ nlPat $ ViewPat NoExtField
             wrappedLit
-            (nlPat $ ConPatIn (nl cjustConName) (PrefixCon []))
+            (nlPat $ ConPat NoExtField (nl cjustConName) (PrefixCon []))
   transformPat _ = Nothing

@@ -50,7 +50,7 @@ library:
   exposed-modules:
     - DependentLiterals.Plugin
   dependencies:
-    - ghc >= 8.6 && < 8.11
+    - ghc >= 8.6 && < 9.1
     - syb
 
 _test-template: &test-template
