@@ -28,6 +28,24 @@ import Data.Maybe (fromMaybe, isJust)
 
 import qualified Data.Generics as SYB
 
+#if MIN_VERSION_ghc(8,10,0)
+#define GHC_Hs GHC.Hs
+#define GHC_Hs_Expr GHC.Hs.Expr
+#define GHC_Hs_Extension GHC.Hs.Extension
+#define GHC_Hs_Lit GHC.Hs.Lit
+#define GHC_Hs_Pat GHC.Hs.Pat
+#define GHC_Hs_Types GHC.Hs.Types
+#define GHC_Hs_Utils GHC.Hs.Utils
+#else
+#define GHC_Hs HsSyn
+#define GHC_Hs_Expr HsExpr
+#define GHC_Hs_Extension HsExtension
+#define GHC_Hs_Lit HsLit
+#define GHC_Hs_Pat HsPat
+#define GHC_Hs_Types HsTypes
+#define GHC_Hs_Utils HsUtils
+#endif
+
 import BasicTypes (IntegralLit(IL), SourceText(NoSourceText))
 import GhcPlugins
          ( Hsc, HsParsedModule(..)
@@ -39,30 +57,52 @@ import GhcPlugins
          , gopt_set, GeneralFlag(Opt_SuppressModulePrefixes)
          , SrcSpan
          )
-import HsExpr (HsExpr(HsAppType, HsOverLit, HsApp, NegApp))
-import HsExtension (NoExt(..))
-import HsLit (HsOverLit(..), OverLitVal(HsIntegral))
-import HsPat (LPat, Pat(ConPatIn, NPat, ViewPat))
-import HsSyn
-         ( GhcPs, HsModule(..), LHsExpr, HsWildCardBndrs(HsWC)
+import GHC_Hs
+         ( HsModule(..), HsWildCardBndrs(HsWC)
          , HsTyLit(HsNumTy)
          , ImportDecl(..), IEWrappedName(..), IE(..)
          )
-import HsTypes
+import GHC_Hs_Lit (HsOverLit(..), OverLitVal(HsIntegral))
+import GHC_Hs_Expr (HsExpr(HsAppType, HsOverLit, HsApp, NegApp), LHsExpr)
+import GHC_Hs_Extension (GhcPs, GhcPass)
+import GHC_Hs_Types
          ( HsType(HsAppTy, HsParTy, HsTyLit, HsTyVar)
          , LHsType, HsConDetails(PrefixCon)
          )
-import HsUtils (nlHsVar, nlHsApp)
+import GHC_Hs_Pat (LPat, Pat(ConPatIn, NPat, ViewPat))
+import GHC_Hs_Utils (nlHsVar, nlHsApp)
 import Module (ModuleName, mkModuleName)
 import OccName (OccName, mkTcOcc, mkVarOcc, mkDataOcc)
 import Outputable ((<+>), Outputable, nest, pprPrec, sep, showSDoc, text)
 import RdrName (RdrName, mkRdrQual, mkRdrUnqual)
+
+#if MIN_VERSION_ghc(8,10,0)
+import GHC.Hs.Extension (NoExtField(..))
+import GHC.Hs.ImpExp (ImportDeclQualifiedStyle(..))
+import GhcPlugins (noLoc)
+#else
+import HsExtension (NoExt(..))
+#endif
 
 #if MIN_VERSION_ghc(8,8,0)
 import BasicTypes (PromotionFlag(..))
 #else
 import GhcPlugins (noLoc)
 import HsTypes (Promoted(..))
+#endif
+
+#if !MIN_VERSION_ghc(8,10,0)
+type NoExtField = NoExt
+pattern NoExtField :: NoExt
+pattern NoExtField = NoExt
+
+type ImportDeclQualifiedStyle = Bool
+pattern QualifiedPre, NotQualified :: ImportDeclQualifiedStyle
+pattern QualifiedPre = True
+pattern NotQualified = False
+#endif
+
+#if !MIN_VERSION_ghc(8,8,0)
 type PromotionFlag = Promoted
 pattern IsPromoted :: PromotionFlag
 pattern IsPromoted = Promoted
@@ -104,16 +144,16 @@ when_ :: Applicative f => Bool -> (a -> f a) -> a -> f a
 when_ True f = f
 when_ False _ = pure
 
-pattern LPat :: Pat p -> LPat p
-#if MIN_VERSION_ghc(8,8,0)
-pattern LPat pat = pat
-#else
+pattern LPat :: Pat (GhcPass p) -> LPat (GhcPass p)
+#if !MIN_VERSION_ghc(8,8,0) || MIN_VERSION_ghc(8,10,0)
 pattern LPat pat <- L _ pat
+#else
+pattern LPat pat <- pat
 #endif
 
-nlPat :: Pat p -> LPat p
+nlPat :: Pat (GhcPass p) -> LPat (GhcPass p)
 nlPat = id
-#if !MIN_VERSION_ghc(8,8,0)
+#if !MIN_VERSION_ghc(8,8,0) || MIN_VERSION_ghc(8,10,0)
   . noLoc
 #endif
 
@@ -135,7 +175,7 @@ transformParsed Config{..} df' (L modLoc HsModule{..}) = do
   return $ L modLoc $ HsModule
     { hsmodDecls = decls
     , hsmodImports =
-        mkModImport litMod Nothing True Nothing :
+        mkModImport litMod Nothing QualifiedPre Nothing :
         unqualLitModImport :
         qualIntModImport :
         hsmodImports
@@ -153,7 +193,7 @@ transformParsed Config{..} df' (L modLoc HsModule{..}) = do
 
   -- import qualified DependentLiterals.Int
   mkModImport nm as q imports = nl $ ImportDecl
-    NoExt
+    NoExtField
     NoSourceText
     (nl nm)
     Nothing -- no package qualifier
@@ -171,14 +211,14 @@ transformParsed Config{..} df' (L modLoc HsModule{..}) = do
   -- ever tell that they're imported.
   -- TODO can we move this plugin post-renamer and do this by generating names
   -- that claim to have been originally unqualified?
-  importVar = IEVar NoExt . nl . IEName .nl
-  importAll = IEThingAll NoExt . nl . IEName . nl
-  importTyOp = IEThingAbs NoExt . nl . IEType . nl
-  unqualLitModImport = mkModImport litMod Nothing False $ Just
+  importVar = IEVar NoExtField . nl . IEName .nl
+  importAll = IEThingAll NoExtField . nl . IEName . nl
+  importTyOp = IEThingAbs NoExtField . nl . IEType . nl
+  unqualLitModImport = mkModImport litMod Nothing NotQualified $ Just
     [ importVar litHashName
     , importTyOp minusHashName
     ]
-  qualIntModImport = mkModImport intMod Nothing True $ Just
+  qualIntModImport = mkModImport intMod Nothing QualifiedPre $ Just
     [ importAll integerName
     ]
 
@@ -197,11 +237,11 @@ transformParsed Config{..} df' (L modLoc HsModule{..}) = do
   mkHsAppType :: LHsExpr GhcPs -> LHsType GhcPs -> HsExpr GhcPs
   mkHsAppType expr ty = HsAppType
 #if MIN_VERSION_ghc(8,8,0)
-    NoExt
+    NoExtField
     expr
-    (HsWC NoExt ty)
+    (HsWC NoExtField ty)
 #else
-    (HsWC NoExt ty)
+    (HsWC NoExtField ty)
     expr
 #endif
 
@@ -213,9 +253,9 @@ transformParsed Config{..} df' (L modLoc HsModule{..}) = do
   nlHsApp_ = nlHsApp
 
   litToTyLit :: IntegralLit -> LHsType GhcPs
-  litToTyLit (IL txt neg val) = nl $ HsParTy NoExt $ nl $ HsAppTy NoExt
-    (nl $ HsTyVar NoExt IsPromoted $ nl (if neg then negName else posName))
-    (nl $ HsTyLit NoExt (HsNumTy txt (abs val)))
+  litToTyLit (IL txt neg val) = nl $ HsParTy NoExtField $ nl $ HsAppTy NoExtField
+    (nl $ HsTyVar NoExtField IsPromoted $ nl (if neg then negName else posName))
+    (nl $ HsTyLit NoExtField (HsNumTy txt (abs val)))
 
   debug :: String -> Hsc ()
   debug s
@@ -256,14 +296,14 @@ transformParsed Config{..} df' (L modLoc HsModule{..}) = do
 
   buildReprLit :: SrcSpan -> IntegralLit -> HsExpr GhcPs -> LHsExpr GhcPs
   buildReprLit l il witness =
-    L l $ HsOverLit NoExt $ OverLit NoExt (HsIntegral il) witness
+    L l $ HsOverLit NoExtField $ OverLit NoExtField (HsIntegral il) witness
 
   rewriteLit :: SrcSpan -> Bool -> IntegralLit -> HsExpr GhcPs -> LHsExpr GhcPs
   rewriteLit l negated il witness =
     let il' = fuseNegation negated il
         wrapper = nlHsVar litHashName `nlHsAppType` litToTyLit il'
         lit = buildReprLit l il' witness
-    in  L l $ HsApp NoExt (nlHsApp wrapper lit) lit
+    in  L l $ HsApp NoExtField (nlHsApp wrapper lit) lit
 
   foldNegation :: LHsExpr GhcPs -> LHsExpr GhcPs
   foldNegation (L l (NegApp _ (L _ (extractLit -> Just (il, witness))) _)) =
@@ -286,7 +326,7 @@ transformParsed Config{..} df' (L modLoc HsModule{..}) = do
             `nlHsApp_` buildReprLit l il' witness
             `nlHsApp_` buildReprLit l il' witness
 
-    in  Just $ nlPat $ ViewPat NoExt
+    in  Just $ nlPat $ ViewPat NoExtField
             wrappedLit
             (nlPat $ ConPatIn (nl cjustConName) (PrefixCon []))
   transformPat _ = Nothing
