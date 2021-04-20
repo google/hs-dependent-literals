@@ -15,5 +15,17 @@
 resolver: lts-14.27
 
 packages:
+- dependent-literals
+- dependent-literals-plugin
 - numeric-kinds
 - snumber
+
+extra-deps:
+- github: google/hs-attenuation
+  commit: 3243f2586e5908a09fdd0c5ee32b0adc72271fc4
+- github: google/hs-fin-vec
+  commit: 12bcae4bb7b3eb4f720ff3d56ee5e30a064eb3f8
+  subdirs:
+    - fin-int
+    - short-vec
+    - sint

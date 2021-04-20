@@ -1,0 +1,119 @@
+# Copyright 2021 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: dependent-literals-plugin
+version: 0.1.0.0
+category: Constraints
+synopsis: Rewrites integer literals to a pseudo-dependently-typed form.
+description: |
+  This plugin rewrites integer literals to uses of `lit#` from
+  `DependentLiterals.Int`, so that the value of the literal is reflected on
+  both the value level and the type level.  This allows
+  pseudo-dependently-typed usage like `mkVec 5 id` ->
+  `[0, 1, 2, 3, 4] :: Vec 5 (Fin 5)`, as well as customized bounds checking
+  like making `5 :: Fin 3` a compile-time error.
+license: Apache-2.0
+author: Andrew Pritchard <awpr@google.com>
+copyright: 2019-2021 Google LLC
+maintainer: Andrew Pritchard <awpr@google.com>
+github: google/hs-dependent-literals/dependent-literals-plugin
+
+# Note: this causes CHANGELOG.md to be included in Hackage distributions.
+extra-source-files:
+  CHANGELOG.md
+
+ghc-options: -Wall -Werror
+
+dependencies:
+  - base >= 4.12 && < 4.16
+  - sint >= 0.1 && < 0.2
+
+flags:
+  error_message_tests:
+    description: "Enable tests that emit error messages for inspection."
+    manual: True
+    default: False
+
+library:
+  source-dirs: src
+  exposed-modules:
+    - DependentLiterals.Plugin
+  dependencies:
+    - ghc >= 8.6 && < 8.7
+    - syb
+
+_test-template: &test-template
+  main: Main.hs
+  source-dirs: tests
+  default-extensions: [NoStarIsType, DataKinds, FlexibleContexts, ViewPatterns]
+  ghc-options: [-fplugin=DependentLiterals.Plugin]
+  dependencies:
+    - fin-int >= 0.1 && < 0.2
+    - short-vec >= 0.1 && < 0.2
+    - numeric-kinds >= 0.1 && < 0.2
+    - snumber >= 0.1 && < 0.2
+    - dependent-literals >= 0.1 && < 0.2
+    - dependent-literals-plugin
+
+
+_error-test-template: &error-test-template
+  <<: *test-template
+  when:
+    condition: "!flag(error_message_tests)"
+    buildable: false
+
+tests:
+  Plugin-test:
+    <<: *test-template
+    other-modules:
+      - Deriving
+      - DoubleNegation
+      - FinLiterals
+      - FinPatterns
+      - FractionalLiterals
+      - FractionalPatterns
+      - IntLiterals
+      - IntPatterns
+      - PolyLiterals
+      - SIntLiterals
+      - SIntPatterns
+      - TestUtils
+      - SNumberLiterals
+      - WithNegativeLiterals
+      - WordLiterals
+      - WordPatterns
+
+  FinErrors-test:
+    <<: *error-test-template
+    other-modules: [FinErrors]
+
+  IntErrors-test:
+    <<: *error-test-template
+    other-modules: [IntErrors]
+
+  PolyErrors-test:
+    <<: *error-test-template
+    other-modules: [PolyErrors]
+
+  SIntErrors-test:
+    <<: *error-test-template
+    other-modules: [SIntErrors]
+
+  SNumberErrors-test:
+    <<: *error-test-template
+    other-modules: [SNumberErrors]
+
+  WordErrors-test:
+    <<: *error-test-template
+    other-modules: [WordErrors]
