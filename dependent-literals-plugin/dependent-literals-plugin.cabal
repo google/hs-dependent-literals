@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8a16f024f9212124bb157d54d347634e8e57900778dfd708c272974293e577b8
+-- hash: 86dcc605a5ff47725b28b6dbddd1201b46203aa073a864e84eb510c8e71ec540
 
 name:           dependent-literals-plugin
 version:        0.1.0.0
@@ -43,7 +43,6 @@ library
       Paths_dependent_literals_plugin
   hs-source-dirs:
       src
-  ghc-options: -Wall -Werror
   build-depends:
       base >=4.12 && <4.16
     , ghc >=8.6 && <9.1
@@ -59,7 +58,7 @@ test-suite FinErrors-test
   hs-source-dirs:
       tests
   default-extensions: NoStarIsType DataKinds FlexibleContexts ViewPatterns TypeApplications
-  ghc-options: -Wall -Werror -fplugin=DependentLiterals.Plugin
+  ghc-options: -fplugin=DependentLiterals.Plugin
   build-depends:
       base >=4.12 && <4.16
     , dependent-literals >=0.1 && <0.2
@@ -81,7 +80,7 @@ test-suite IntErrors-test
   hs-source-dirs:
       tests
   default-extensions: NoStarIsType DataKinds FlexibleContexts ViewPatterns TypeApplications
-  ghc-options: -Wall -Werror -fplugin=DependentLiterals.Plugin
+  ghc-options: -fplugin=DependentLiterals.Plugin
   build-depends:
       base >=4.12 && <4.16
     , dependent-literals >=0.1 && <0.2
@@ -118,7 +117,7 @@ test-suite Plugin-test
   hs-source-dirs:
       tests
   default-extensions: NoStarIsType DataKinds FlexibleContexts ViewPatterns TypeApplications
-  ghc-options: -Wall -Werror -fplugin=DependentLiterals.Plugin
+  ghc-options: -fplugin=DependentLiterals.Plugin
   build-depends:
       base >=4.12 && <4.16
     , dependent-literals >=0.1 && <0.2
@@ -138,7 +137,7 @@ test-suite PolyErrors-test
   hs-source-dirs:
       tests
   default-extensions: NoStarIsType DataKinds FlexibleContexts ViewPatterns TypeApplications
-  ghc-options: -Wall -Werror -fplugin=DependentLiterals.Plugin
+  ghc-options: -fplugin=DependentLiterals.Plugin
   build-depends:
       base >=4.12 && <4.16
     , dependent-literals >=0.1 && <0.2
@@ -160,7 +159,7 @@ test-suite SIntErrors-test
   hs-source-dirs:
       tests
   default-extensions: NoStarIsType DataKinds FlexibleContexts ViewPatterns TypeApplications
-  ghc-options: -Wall -Werror -fplugin=DependentLiterals.Plugin
+  ghc-options: -fplugin=DependentLiterals.Plugin
   build-depends:
       base >=4.12 && <4.16
     , dependent-literals >=0.1 && <0.2
@@ -182,7 +181,7 @@ test-suite SNumberErrors-test
   hs-source-dirs:
       tests
   default-extensions: NoStarIsType DataKinds FlexibleContexts ViewPatterns TypeApplications
-  ghc-options: -Wall -Werror -fplugin=DependentLiterals.Plugin
+  ghc-options: -fplugin=DependentLiterals.Plugin
   build-depends:
       base >=4.12 && <4.16
     , dependent-literals >=0.1 && <0.2
@@ -204,7 +203,7 @@ test-suite WordErrors-test
   hs-source-dirs:
       tests
   default-extensions: NoStarIsType DataKinds FlexibleContexts ViewPatterns TypeApplications
-  ghc-options: -Wall -Werror -fplugin=DependentLiterals.Plugin
+  ghc-options: -fplugin=DependentLiterals.Plugin
   build-depends:
       base >=4.12 && <4.16
     , dependent-literals >=0.1 && <0.2

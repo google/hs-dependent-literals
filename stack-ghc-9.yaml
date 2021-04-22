@@ -23,14 +23,25 @@ packages:
 
 extra-deps:
 - github: google/hs-attenuation
-  commit: 3243f2586e5908a09fdd0c5ee32b0adc72271fc4
+  commit: 6d9292cc0eaa549821d556405658500e35e9b166
 - github: google/hs-fin-vec
-  commit: 12bcae4bb7b3eb4f720ff3d56ee5e30a064eb3f8
+  commit: 9bbf009e5319e1440ad2d2446e6801f6425ff456
   subdirs:
     - fin-int
     - short-vec
     - sint
+- github: google/hs-portray
+  commit: 2b88ef2bfde420673f5143eadd3da4a5d30eca8c
+  subdirs:
+    - portray
+- github: google/hs-wrapped
+  commit: 2cc2bf02d23d1a66a0ca41b8a7f76192788cb286
+  subdirs:
+    - wrapped
 - indexed-traversable-0.1.1
 - indexed-traversable-instances-0.1
 - profunctors-5.6.2
 - lens-5.0.1
+
+ghc-options:
+  "$locals": -Wall -Werror

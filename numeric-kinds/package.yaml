@@ -30,8 +30,6 @@ github: google/hs-dependent-literals/numeric-kinds
 extra-source-files:
   CHANGELOG.md
 
-ghc-options: -Wall -Werror
-
 dependencies:
   - base >= 4.12 && < 4.16
 

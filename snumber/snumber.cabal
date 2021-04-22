@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 0872e37003cfe76616b3bd960bf42778a902f043f1d6bf0b265022ab64ecb253
+-- hash: 07ba66b9b06286101b8894bcd7b5a6877a22bd2da535a2a3e241f2433f663b24
 
 name:           snumber
 version:        0.1.0.0
@@ -38,7 +38,6 @@ library
       Paths_snumber
   hs-source-dirs:
       src
-  ghc-options: -Wall -Werror
   build-depends:
       base >=4.12 && <4.16
     , numeric-kinds >=0.1 && <0.2

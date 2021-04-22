@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a17de9af4fcb7ae5cc481d541927178cff6531ed94cd0da81779e030812d0edf
+-- hash: 0fd2cac301cf4235b9197931d6c5199cc4a36e13578307dc02e7da3c30ce07aa
 
 name:           dependent-literals
 version:        0.1.0.0
@@ -36,7 +36,6 @@ library
       Paths_dependent_literals
   hs-source-dirs:
       src
-  ghc-options: -Wall -Werror
   build-depends:
       base >=4.12 && <4.16
     , fin-int >=0.1 && <0.2
