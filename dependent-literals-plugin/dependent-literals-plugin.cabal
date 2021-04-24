@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 86dcc605a5ff47725b28b6dbddd1201b46203aa073a864e84eb510c8e71ec540
+-- hash: 1017527fd2d152496dcb2ce33956de73b88fa6670c4fb80a04b17c60caeeb101
 
 name:           dependent-literals-plugin
 version:        0.1.0.0
@@ -114,6 +114,7 @@ test-suite Plugin-test
       WithNegativeLiterals
       WordLiterals
       WordPatterns
+      VecExamples
   hs-source-dirs:
       tests
   default-extensions: NoStarIsType DataKinds FlexibleContexts ViewPatterns TypeApplications

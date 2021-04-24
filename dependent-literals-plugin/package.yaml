@@ -96,6 +96,7 @@ tests:
       - WithNegativeLiterals
       - WordLiterals
       - WordPatterns
+      - VecExamples
 
   FinErrors-test:
     <<: *error-test-template
