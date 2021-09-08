@@ -46,9 +46,10 @@ module DependentLiterals.Bounds
          , OutOfRangeErr
 
            -- ** Inequality Assertions
-         -- , IsAtLeastMinBound, IsLessThanMaxBound
-
          , CheckLessThanMaxBound, CheckAtLeastMinBound, AssertEq, AssertNotApart
+
+           -- * Implementation Details
+         , ShowNum, AssertNotApart_, Eql, FailedToProveEq
          ) where
 
 import Data.Kind (Constraint, Type)
@@ -82,7 +83,7 @@ type family Eql a b :: Bool where
 class a ~ b => AssertEq (c :: Constraint) a b
 instance AssertEq c a a
 
--- If you tried to prove a constraint and failed, and want to issue a custom
+-- | If you tried to prove a constraint and failed, and want to issue a custom
 -- error message for it explicitly, write something like this.
 --
 -- Given "class _c => FailedToProveC (err :: Constraint) ...",

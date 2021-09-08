@@ -41,12 +41,29 @@
 {-# LANGUAGE StandaloneDeriving #-}
 #endif
 
-module DependentLiterals.Int
-         ( type (-#), CMaybe(..)
-         , HasBasicLiterals, AllowsIntLiteral, IntLiteral
-         , StockLit(..), SNum(..), SNumLit(..)
+-- | The library component of "DependentLiterals.Plugin".
+--
+-- This provides a class for dependent numeric literal functionality, the entry
+-- points used by the plugin for literals and patterns, and a few ways of
+-- defining instances with less unsafe-ty.
 
-         , lit#, match#, valueOf, HasIntLiterals(..)
+module DependentLiterals.Int
+         ( -- * Dependent Literals
+           HasIntLiterals(..), valueOf
+
+           -- ** Convenience Aliases
+         , HasBasicLiterals, AllowsIntLiteral, IntLiteral
+
+           -- ** Safer Implementations
+         , StockLit(..)
+         , SNum(..), Satisfying(..), SNumLit(..)
+         , type (-#), CMaybe(..)
+
+           -- ** Plugin Entry Points
+         , lit#, match#
+
+           -- * Implementation Details
+         , NoAssertion
          ) where
 
 import Data.Functor.Const (Const(..))
@@ -84,15 +101,35 @@ import DependentLiterals.Bounds
          )
 
 
+-- | A GADT containing some @t x@ along with a @c x@ instance.
 data Satisfying c t = forall x. c x => Satisfying (t x)
+
+-- | 'Maybe' on 'Constraint's.
 data CMaybe c = c => CJust | CNothing
 
--- User-facing dependent numeric type class: implement this small, clean API
--- and lift it to HasIntLiterals with DerivingVia + SNumLit.
+-- | A user-facing dependent numeric typeclass.
+--
+-- This gives an isomorphism between @a@ and @exists n. SNumber (SNumRepr a) n@
+-- given that @SNumConstraint a n@ holds.
+--
+-- To get instances of 'HasIntLiterals' without interacting with the unsafe
+-- parts of the library, implement this class and lift it to 'HasIntLiterals'
+-- with @deriving HasIntLiterals via SNumLit MyAssertionClass MyType@.
 class SNum a where
+  -- | The underlying numerical representation type.
   type SNumRepr a :: Type
+
+  -- | The constraint on literal values to validate/refine @a@.
   type SNumConstraint a :: K.Integer -> Constraint
+
+  -- | Conversion from 'SNumber' with a proof of 'SNumConstraint' into @a@.
+  --
+  -- Used for interpreting integral literals.
   fromSNum :: Satisfying (SNumConstraint a) (SNumber (SNumRepr a)) -> a
+
+  -- | Conversion from @a@ into 'SNumber' with a proof of 'SNumConstraint.'
+  --
+  -- Used for providing proofs on successful pattern matches.
   intoSNum :: a -> Satisfying (SNumConstraint a) (SNumber (SNumRepr a))
 
 instance SNum (SInt n) where
@@ -121,8 +158,15 @@ instance SNum (Fin n) where
   fromSNum (Satisfying (N# x)) = unsafeFin x
   intoSNum x = unsafeCoerce (Satisfying @NoConstraint (N# (finToInt x)))
 
+-- | The main class providing dependent-literals functionality.
+--
+-- Instances of this can have integral literals and numeric patterns with
+-- @-fplugin="DependentLiterals.Plugin"@.
+--
+-- This class exposes the internal unsafe machinery of the library; a safer and
+-- less error-prone way to get instances for it is via 'SNum' or 'StockLit'.
 class HasIntLiterals a where
-  -- Constraint for representational validity of a literal: this is meant to
+  -- | Constraint for representational validity of a literal: this is meant to
   -- prevent overflowed literals from being wrapped incorrectly in 'N#'.  This
   -- is required both for expressions and for patterns.
   --
@@ -131,50 +175,88 @@ class HasIntLiterals a where
   -- may use 'ReprAssertion' to restrict the values they can receive.
   type ReprAssertion a :: Type -> K.Integer -> Constraint
 
+  -- | @LitConstraint a n@ constrains or refines @a@ given the literal value.
+  --
+  -- This is what's proven about the integer value and type by matching on a
+  -- numeric pattern; for example, in the case of @SInt n@, @LitConstraint a m@
+  -- is @m ~ n@, so that matching numeric 'SInt' patterns introduces equality
+  -- proofs for the type parameter.
   type LitConstraint a :: K.Integer -> Constraint
 
-  -- Like LitConstraint but with pretty error messages.
+  -- | Like 'LitConstraint' but with pretty error messages.
+  --
+  -- This is used on integral literals to provide custom error messages for
+  -- failed constraints.
   type LitAssertion a :: Type -> K.Integer -> Constraint
 
-  -- Unsafe in that it trusts that the Integer you give it is the same as the
+  -- | Runtime conversion from 'Integer' to the appropriate type.
+  --
+  -- Unsafe in that it trusts that the 'Integer' you give it is the same as the
   -- type-level one.
   unsafeFromInteger
     :: forall n b
      . (LitAssertion a b n, ReprAssertion a b n)
     => Proxy b -> Tagged n Integer -> a
 
-  -- Unsafe in that it trusts that the Integer you give it is the same as the
+  -- | Runtime pattern match implementation.
+  --
+  -- Unsafe in that it trusts that the 'Integer' you give it is the same as the
   -- type-level one.
   unsafeMatchInteger
     :: forall n b
      . ReprAssertion a b n
     => Proxy b -> Tagged n Integer -> a -> CMaybe (LitConstraint a n)
 
+-- | A constraint alias that asserts you can use any integral literal.
+--
+-- This can be useful in polymorphic contexts when you don't want to list out
+-- constraints for every literal value you need, and are willing to accept that
+-- some types with stronger compile-time validation will be excluded.
 type HasBasicLiterals a =
   ( HasIntLiterals a
   , LitAssertion a ~ NoAssertion
   , ReprAssertion a ~ NoAssertion
   )
 
+-- | A constraint alias showing that the particular value @n@ is valid for @a@.
+--
+-- With this in context along with @'HasIntLiterals' a@, you can use an
+-- integral literal value @n@ at type @a@.  See also 'IntLiteral'.
 type AllowsIntLiteral n a =
   ( LitAssertion a a (ToInteger n)
   , ReprAssertion a a (ToInteger n)
   )
 
+-- | A convenient form of 'IntLiteral' when only one value is needed.
+--
+-- This is a constraint tuple, so using this multiple times in a signature
+-- creates a bit of constraint pollution; for tidier signatures, use one
+-- 'HasIntLiterals' and several 'AllowsIntLiteral's.
 type IntLiteral n a = (HasIntLiterals a, AllowsIntLiteral n a)
 
+-- | The unsafe entry point used by "DependentLiterals.Plugin" for literals.
+--
+-- This is unsafe to use explicitly, since it implicitly trusts that the given
+-- 'Integer' is equal to the type-level integer.  The plugin guarantees this
+-- itself when generating calls, so its uses are safe.
 lit#
   :: forall n a
    . (HasIntLiterals a, ReprAssertion a a n, LitAssertion a a n)
   => (Num a => a) -> Integer -> a
 lit# _ = unsafeFromInteger (Proxy @a) . Tagged @n
 
+-- | The unsafe entry point used by "DependentLiterals.Plugin" for patterns.
+--
+-- This is unsafe to use explicitly, since it implicitly trusts that the given
+-- 'Integer' is equal to the type-level integer.  The plugin guarantees this
+-- itself when generating calls, so its uses are safe.
 match#
   :: forall n a
    . (HasIntLiterals a, ReprAssertion a a n)
   => (Num a => a) -> Integer -> a -> CMaybe (LitConstraint a n)
 match# _ = unsafeMatchInteger (Proxy @a) . Tagged @n
 
+-- | 'valueOf' specialized to 'Integer'.
 valueOf' :: forall n a. (IntLiteral n a, KnownInteger n) => a
 valueOf' = unsafeFromInteger (Proxy @a) (Tagged @n $ toInteger $ integerVal @n)
 
@@ -188,6 +270,7 @@ valueOf
   => a
 valueOf = valueOf' @(ToInteger n)
 
+-- | A newtype carrying a 'HasIntLiterals' instance for use with @DerivingVia@.
 newtype SNumLit (c :: Type -> K.Integer -> Constraint) a = SNumLit a
 
 class SNumConstraint a n => SNumLitAssertion c a b n
@@ -224,11 +307,14 @@ instance (Eq (SNumRepr a), Num (SNumRepr a), SNum a)
 -- (or if the type is supported by -Woverflowed-literals), this is a good way
 -- to get an instance.
 --
--- This is suitable for DerivingVia and tends to work as a deriving clause, so:
+-- This is suitable for @DerivingVia@ and tends to work as a deriving clause,
+-- so:
 --
+-- @
 --     newtype MyType = MyType Int
 --       deriving Num
 --       deriving HasIntLiterals via StockLit Int
+-- @
 --
 -- Note in this case you could just as well say @deriving HasIntLiterals@ to
 -- get a @GeneralizedNewtypeDeriving@ instance that consumes Int literals and
@@ -239,6 +325,7 @@ newtype StockLit a = StockLit a
 class NoConstraint (a :: k)
 instance NoConstraint a
 
+-- | The "assertion" used by basic integral literals, which is always solvable.
 class NoAssertion (a :: Type) (n :: K.Integer)
 instance NoAssertion a n
 

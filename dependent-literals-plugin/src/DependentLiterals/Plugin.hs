@@ -21,7 +21,9 @@
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE ViewPatterns #-}
 
-module DependentLiterals.Plugin where
+-- | A GHC plugin making numeric literals and patterns pseudo-dependently-typed.
+
+module DependentLiterals.Plugin (plugin) where
 
 import Data.Foldable (for_)
 import Data.Maybe (fromMaybe, isJust)
