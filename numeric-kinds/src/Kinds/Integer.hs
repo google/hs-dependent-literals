@@ -46,7 +46,7 @@ module Kinds.Integer
          , KnownInteger(..)
 
            -- ** Specialized Arithmetic and Comparison
-         , AddInteger, SubInteger, CmpInteger
+         , AddInteger, SubInteger, CmpInteger, MulInteger
          , type (-#)
 
            -- * Axioms

@@ -128,7 +128,7 @@ import Kinds.Num (type (+), type (-), type (*))
 --
 --     * If by runtime checks, the function name has a "try" infix.
 --     * If by trusting the caller blindly, the function name has an "unsafe"
---       prefix and an "Unchecked" infix.
+--       prefix and an \"Unchecked\" infix.
 --     * If by type-level bounds checks, the function name has neither of these.
 --
 -- * How do you validate that the runtime Integer value matches the type-level

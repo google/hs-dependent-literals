@@ -17,8 +17,9 @@ version: 0.1.0.0
 category: Constraints
 synopsis: Provides library support for pseudo-dependently-typed int literals.
 description: |
-  This is the library counterpart of `dependent-literals-plugin`.  See that
-  package's description for more details.
+  This is the library counterpart of
+  <https://hackage.haskell.org/package/dependent-literals-plugin dependent-literals-plugin>.
+  See that package's description for more details.
 license: Apache-2.0
 author: Andrew Pritchard <awpr@google.com>
 copyright: 2019-2021 Google LLC

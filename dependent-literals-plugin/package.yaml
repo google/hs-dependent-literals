@@ -17,12 +17,31 @@ version: 0.1.0.0
 category: Constraints
 synopsis: Rewrites integer literals to a pseudo-dependently-typed form.
 description: |
-  This plugin rewrites integer literals to uses of `lit#` from
-  `DependentLiterals.Int`, so that the value of the literal is reflected on
-  both the value level and the type level.  This allows
-  pseudo-dependently-typed usage like `mkVec 5 id` ->
-  `[0, 1, 2, 3, 4] :: Vec 5 (Fin 5)`, as well as customized bounds checking
-  like making `5 :: Fin 3` a compile-time error.
+  This plugin implements pseudo-dependently-typed integer literals.
+
+  This means the value of an integer literal is available at the type level,
+  and can be used for things like validation or type inference.  For example,
+  the 'SInt' instance refines unknown type-level 'Nat' variables to the
+  particular literal value, and the 'Fin' instance emits compile-time errors
+  for out-of-range values.  So, given
+  @mkVec :: SInt n -> (Fin n -> a) -> Vec n a@, @mkVec 4@ will have type
+  @(Fin 4 -> a) -> Vec 4 a@, and trying to type-check @4 :: Fin 4@ will report
+  a type error saying that @4@ is out of range.
+
+  Patterns get a similar treatment, too, so
+  @case (x :: SInt n) of { 1 -> Just Refl; _ -> Nothing } :: Maybe (n :~: 1)@
+  can type-check: the act of matching against 1 proved that the type-level @n@
+  was equal to 1, so 'Refl' can type-check as @n :~: 1@.
+
+  To use this, enable the extensions @DataKinds@, @FlexibleContexts@,
+  @ViewPatterns@, and @TypeApplications@, add @dependent-literals@ and
+  @dependent-literals-plugin@ to your package's dependencies, and add
+  @-fplugin=DependentLiterals.Plugin@ to @ghc-options@ to enable the plugin
+  globally, or use @OPTIONS_GHC@ pragmas to enable the plugin on a per-module
+  basis.  \"Normal\" integral types should still behave as normal, but literals
+  and numeric patterns will become supported for 'SInt' and 'Fin', and will
+  provide additional information to the type checker automatically.
+
 license: Apache-2.0
 author: Andrew Pritchard <awpr@google.com>
 copyright: 2019-2021 Google LLC
@@ -35,7 +54,6 @@ extra-source-files:
 
 dependencies:
   - base >= 4.12 && < 4.16
-  - sint >= 0.1 && < 0.2
 
 flags:
   error_message_tests:
@@ -65,6 +83,7 @@ _test-template: &test-template
     - fin-int >= 0.1 && < 0.2
     - short-vec >= 0.1 && < 0.2
     - numeric-kinds >= 0.1 && < 0.2
+    - sint >= 0.1 && < 0.2
     - snumber >= 0.1 && < 0.2
     - dependent-literals >= 0.1 && < 0.2
     - dependent-literals-plugin

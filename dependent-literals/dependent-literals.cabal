@@ -4,13 +4,14 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 0fd2cac301cf4235b9197931d6c5199cc4a36e13578307dc02e7da3c30ce07aa
+-- hash: 30f8fe2e48f6bbcd438d851405bf47990834dff8704739447c29c6398746aa0e
 
 name:           dependent-literals
 version:        0.1.0.0
 synopsis:       Provides library support for pseudo-dependently-typed int literals.
-description:    This is the library counterpart of `dependent-literals-plugin`.  See that
-                package's description for more details.
+description:    This is the library counterpart of
+                <https://hackage.haskell.org/package/dependent-literals-plugin dependent-literals-plugin>.
+                See that package's description for more details.
 category:       Constraints
 homepage:       https://github.com/google/hs-dependent-literals#readme
 bug-reports:    https://github.com/google/hs-dependent-literals/issues
@@ -18,6 +19,7 @@ author:         Andrew Pritchard <awpr@google.com>
 maintainer:     Andrew Pritchard <awpr@google.com>
 copyright:      2019-2021 Google LLC
 license:        Apache-2.0
+license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
     CHANGELOG.md

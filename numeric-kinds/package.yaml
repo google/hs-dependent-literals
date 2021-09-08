@@ -20,6 +20,11 @@ description: |
   This provides numeric types meant for use at the type level with -XDataKinds,
   along with type families that act like type-level typeclasses providing
   various operations.
+
+  Currently, this primarily exists in support of
+  <https://hackage.haskell.org/package/snumber snumber> and
+  <https://hackage.haskell.org/package/dependent-literals-plugin dependent-literals-plugin>,
+  and the only type-level numeric type in the current version is @Integer@.
 license: Apache-2.0
 author: Andrew Pritchard <awpr@google.com>
 copyright: 2020-2021 Google LLC

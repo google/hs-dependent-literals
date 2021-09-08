@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 878d2faddff4ab3e1e4451b0343a8b750b983ee46970d77479547c881a2e5078
+-- hash: 05ac8c3fea5a45f8da84a8ec3977066bf0902c70969070e7baab2643ef9c665b
 
 name:           numeric-kinds
 version:        0.1.0.0
@@ -12,6 +12,11 @@ synopsis:       Type-level numeric types, classes, and instances.
 description:    This provides numeric types meant for use at the type level with -XDataKinds,
                 along with type families that act like type-level typeclasses providing
                 various operations.
+                .
+                Currently, this primarily exists in support of
+                <https://hackage.haskell.org/package/snumber snumber> and
+                <https://hackage.haskell.org/package/dependent-literals-plugin dependent-literals-plugin>,
+                and the only type-level numeric type in the current version is @Integer@.
 category:       Numeric
 homepage:       https://github.com/google/hs-dependent-literals#readme
 bug-reports:    https://github.com/google/hs-dependent-literals/issues
@@ -19,6 +24,7 @@ author:         Andrew Pritchard <awpr@google.com>
 maintainer:     Andrew Pritchard <awpr@google.com>
 copyright:      2020-2021 Google LLC
 license:        Apache-2.0
+license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
   CHANGELOG.md

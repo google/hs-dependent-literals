@@ -22,6 +22,9 @@ description: |
   implicitly-passed) 'KnownNat' instances, you can work with (visible,
   explicitly-mentioned) 'SNumber' values, and can freely convert between the
   two forms.
+
+  This primarily exists in support of
+  <https://hackage.haskell.org/package/dependent-literals-plugin dependent-literals-plugin>.
 license: Apache-2.0
 author: Andrew Pritchard <awpr@google.com>
 copyright: 2020-2021 Google LLC

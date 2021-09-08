@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 07ba66b9b06286101b8894bcd7b5a6877a22bd2da535a2a3e241f2433f663b24
+-- hash: 1d0ab9e8374cc94aff152971e0a8de1ddbc04e736cfa1bffd8722cff99b603c6
 
 name:           snumber
 version:        0.1.0.0
@@ -14,6 +14,9 @@ description:    This provides singletons-style witnesses for type-level integers
                 implicitly-passed) 'KnownNat' instances, you can work with (visible,
                 explicitly-mentioned) 'SNumber' values, and can freely convert between the
                 two forms.
+                .
+                This primarily exists in support of
+                <https://hackage.haskell.org/package/dependent-literals-plugin dependent-literals-plugin>.
 category:       Constraints
 homepage:       https://github.com/google/hs-dependent-literals#readme
 bug-reports:    https://github.com/google/hs-dependent-literals/issues
@@ -21,6 +24,7 @@ author:         Andrew Pritchard <awpr@google.com>
 maintainer:     Andrew Pritchard <awpr@google.com>
 copyright:      2020-2021 Google LLC
 license:        Apache-2.0
+license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
     CHANGELOG.md
