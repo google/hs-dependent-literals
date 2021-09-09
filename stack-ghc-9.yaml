@@ -22,22 +22,13 @@ packages:
 - snumber
 
 extra-deps:
-- github: google/hs-attenuation
-  commit: 6d9292cc0eaa549821d556405658500e35e9b166
-- github: google/hs-fin-vec
-  commit: 744585f368e10999227ccb22584733edd7a40e6d
-  subdirs:
-    - fin-int
-    - short-vec
-    - sint
-- github: google/hs-portray
-  commit: 2b88ef2bfde420673f5143eadd3da4a5d30eca8c
-  subdirs:
-    - portray
-- github: google/hs-wrapped
-  commit: 2cc2bf02d23d1a66a0ca41b8a7f76192788cb286
-  subdirs:
-    - wrapped
+- attenuation-0.1.0.0
+- fin-int-0.1.0.0
+- short-vec-0.1.0.0
+- sint-0.1.0.0
+- portray-0.1.0.0
+- portray-diff-0.1.0.0
+- wrapped-0.1.0.0
 - indexed-traversable-0.1.1
 - indexed-traversable-instances-0.1
 - profunctors-5.6.2
