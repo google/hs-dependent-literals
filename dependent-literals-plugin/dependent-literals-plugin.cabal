@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 36ec8ae7ecaa56006786e7772271804225d27b9ef511f8a251b9b16812e4ca82
+-- hash: 6636c1b971b60866f125f4a04b3a0d9a32bf1750013689f357a9ae6e75349c94
 
 name:           dependent-literals-plugin
 version:        0.1.0.1
@@ -218,6 +218,27 @@ test-suite SNumberErrors-test
     , wrapped >=0.1 && <0.2
   if !flag(error_message_tests)
     buildable: False
+  default-language: Haskell2010
+
+test-suite TupleIndexing-test
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  other-modules:
+      TupleIndexing
+  hs-source-dirs:
+      tests
+  default-extensions: NoStarIsType DataKinds FlexibleContexts ViewPatterns TypeApplications
+  ghc-options: -fplugin=DependentLiterals.Plugin
+  build-depends:
+      base >=4.12 && <4.16
+    , dependent-literals >=0.1.1 && <0.2
+    , dependent-literals-plugin
+    , fin-int >=0.1 && <0.2
+    , numeric-kinds >=0.1 && <0.2
+    , short-vec >=0.1 && <0.2
+    , sint >=0.1 && <0.2
+    , snumber >=0.1 && <0.2
+    , wrapped >=0.1 && <0.2
   default-language: Haskell2010
 
 test-suite WordErrors-test

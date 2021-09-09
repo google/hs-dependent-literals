@@ -141,3 +141,7 @@ tests:
   WordErrors-test:
     <<: *error-test-template
     other-modules: [WordErrors]
+
+  TupleIndexing-test:
+    <<: *test-template
+    other-modules: [TupleIndexing]
