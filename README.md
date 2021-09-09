@@ -1,6 +1,6 @@
 # dependent-literals
 
-Pseudo-dependently-type integral literals for Haskell.
+Pseudo-dependently-typed integral literals for Haskell.
 
 ## Disclaimer
 
