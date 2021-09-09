@@ -158,7 +158,7 @@ type HsModulePs = HsModule
 -- Pre-8.10 compatibility shims.
 #if !MIN_VERSION_ghc(8,10,0)
 type NoExtField = NoExt
-pattern NoExtField :: NoExt
+pattern NoExtField :: NoExtField
 pattern NoExtField = NoExt
 
 type ImportDeclQualifiedStyle = Bool
