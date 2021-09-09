@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: acdf4e8362e54c7dabc311e213378ec098339936e11995a39c08d189594f7ece
+-- hash: 36ec8ae7ecaa56006786e7772271804225d27b9ef511f8a251b9b16812e4ca82
 
 name:           dependent-literals-plugin
-version:        0.1.0.0
+version:        0.1.0.1
 synopsis:       Rewrites integer literals to a pseudo-dependently-typed form.
 description:    This plugin implements pseudo-dependently-typed integer literals.
                 .
@@ -79,13 +79,14 @@ test-suite FinErrors-test
   ghc-options: -fplugin=DependentLiterals.Plugin
   build-depends:
       base >=4.12 && <4.16
-    , dependent-literals >=0.1 && <0.2
+    , dependent-literals >=0.1.1 && <0.2
     , dependent-literals-plugin
     , fin-int >=0.1 && <0.2
     , numeric-kinds >=0.1 && <0.2
     , short-vec >=0.1 && <0.2
     , sint >=0.1 && <0.2
     , snumber >=0.1 && <0.2
+    , wrapped >=0.1 && <0.2
   if !flag(error_message_tests)
     buildable: False
   default-language: Haskell2010
@@ -101,13 +102,14 @@ test-suite IntErrors-test
   ghc-options: -fplugin=DependentLiterals.Plugin
   build-depends:
       base >=4.12 && <4.16
-    , dependent-literals >=0.1 && <0.2
+    , dependent-literals >=0.1.1 && <0.2
     , dependent-literals-plugin
     , fin-int >=0.1 && <0.2
     , numeric-kinds >=0.1 && <0.2
     , short-vec >=0.1 && <0.2
     , sint >=0.1 && <0.2
     , snumber >=0.1 && <0.2
+    , wrapped >=0.1 && <0.2
   if !flag(error_message_tests)
     buildable: False
   default-language: Haskell2010
@@ -139,13 +141,14 @@ test-suite Plugin-test
   ghc-options: -fplugin=DependentLiterals.Plugin
   build-depends:
       base >=4.12 && <4.16
-    , dependent-literals >=0.1 && <0.2
+    , dependent-literals >=0.1.1 && <0.2
     , dependent-literals-plugin
     , fin-int >=0.1 && <0.2
     , numeric-kinds >=0.1 && <0.2
     , short-vec >=0.1 && <0.2
     , sint >=0.1 && <0.2
     , snumber >=0.1 && <0.2
+    , wrapped >=0.1 && <0.2
   default-language: Haskell2010
 
 test-suite PolyErrors-test
@@ -159,13 +162,14 @@ test-suite PolyErrors-test
   ghc-options: -fplugin=DependentLiterals.Plugin
   build-depends:
       base >=4.12 && <4.16
-    , dependent-literals >=0.1 && <0.2
+    , dependent-literals >=0.1.1 && <0.2
     , dependent-literals-plugin
     , fin-int >=0.1 && <0.2
     , numeric-kinds >=0.1 && <0.2
     , short-vec >=0.1 && <0.2
     , sint >=0.1 && <0.2
     , snumber >=0.1 && <0.2
+    , wrapped >=0.1 && <0.2
   if !flag(error_message_tests)
     buildable: False
   default-language: Haskell2010
@@ -181,13 +185,14 @@ test-suite SIntErrors-test
   ghc-options: -fplugin=DependentLiterals.Plugin
   build-depends:
       base >=4.12 && <4.16
-    , dependent-literals >=0.1 && <0.2
+    , dependent-literals >=0.1.1 && <0.2
     , dependent-literals-plugin
     , fin-int >=0.1 && <0.2
     , numeric-kinds >=0.1 && <0.2
     , short-vec >=0.1 && <0.2
     , sint >=0.1 && <0.2
     , snumber >=0.1 && <0.2
+    , wrapped >=0.1 && <0.2
   if !flag(error_message_tests)
     buildable: False
   default-language: Haskell2010
@@ -203,13 +208,14 @@ test-suite SNumberErrors-test
   ghc-options: -fplugin=DependentLiterals.Plugin
   build-depends:
       base >=4.12 && <4.16
-    , dependent-literals >=0.1 && <0.2
+    , dependent-literals >=0.1.1 && <0.2
     , dependent-literals-plugin
     , fin-int >=0.1 && <0.2
     , numeric-kinds >=0.1 && <0.2
     , short-vec >=0.1 && <0.2
     , sint >=0.1 && <0.2
     , snumber >=0.1 && <0.2
+    , wrapped >=0.1 && <0.2
   if !flag(error_message_tests)
     buildable: False
   default-language: Haskell2010
@@ -225,13 +231,14 @@ test-suite WordErrors-test
   ghc-options: -fplugin=DependentLiterals.Plugin
   build-depends:
       base >=4.12 && <4.16
-    , dependent-literals >=0.1 && <0.2
+    , dependent-literals >=0.1.1 && <0.2
     , dependent-literals-plugin
     , fin-int >=0.1 && <0.2
     , numeric-kinds >=0.1 && <0.2
     , short-vec >=0.1 && <0.2
     , sint >=0.1 && <0.2
     , snumber >=0.1 && <0.2
+    , wrapped >=0.1 && <0.2
   if !flag(error_message_tests)
     buildable: False
   default-language: Haskell2010

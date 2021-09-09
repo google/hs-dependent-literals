@@ -13,7 +13,7 @@
 # limitations under the License.
 
 name: dependent-literals
-version: 0.1.0.0
+version: 0.1.1.0
 category: Constraints
 synopsis: Provides library support for pseudo-dependently-typed int literals.
 description: |
@@ -37,6 +37,7 @@ dependencies:
   - snumber >= 0.1 && < 0.2
   - fin-int >= 0.1 && < 0.2
   - tagged >= 0.8 && < 0.9
+  - wrapped >= 0.1 && < 0.2
 
 library:
   source-dirs: src

@@ -22,14 +22,15 @@ module Deriving where
 
 import Data.Int (Int8)
 import Data.SNumber (SNumber)
-import DependentLiterals (HasIntLiterals, StockLit(..))
+import Data.Wrapped (Wrapped(..))
+import DependentLiterals (HasIntLiterals)
 import GHC.TypeNats (type (*))
 import Kinds.Integer (Integer(..))
 import Data.Fin.Int (Fin)
 
 newtype MyType = MyType Int
 #if !defined(__HLINT__)
-  deriving HasIntLiterals via StockLit Int
+  deriving HasIntLiterals via Wrapped Num Int
 #endif
 
 x0 :: MyType
@@ -70,3 +71,12 @@ x5 = 42
 
 x6 :: MyInt8
 x6 = -7
+
+newtype MyType5 = MyType5 Int
+#if !defined(__HLINT__)
+  deriving (Eq, Num)
+  deriving HasIntLiterals via Wrapped Num MyType5
+#endif
+
+x7 :: MyType5
+x7 = 0

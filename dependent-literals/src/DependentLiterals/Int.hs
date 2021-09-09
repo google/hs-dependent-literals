@@ -87,9 +87,10 @@ import GHC.TypeNats (Nat)
 import Numeric.Natural (Natural)
 import Unsafe.Coerce (unsafeCoerce)
 
-import Data.Tagged (Tagged(..))
 import Data.SInt (SInt(SI#, unSInt))
 import Data.SNumber (SafeSNumber, SNumber(N#), sameSNumber, unsafeMkSNumber)
+import Data.Tagged (Tagged(..))
+import Data.Wrapped (Wrapped(..))
 import Kinds.Integer (type (-#), KnownInteger(..), pattern Pos)
 import Kinds.Num (type (>=), type (<), Cmp, ToInteger)
 import qualified Kinds.Integer as K (Integer)
@@ -299,7 +300,11 @@ instance (Eq (SNumRepr a), Num (SNumRepr a), SNum a)
           Nothing   -> CNothing
 
 
--- | A type with a 'HasIntLiterals' instance that just behaves like 'Num'.
+-- | Use @'Wrapped' Num@ directly instead.
+--
+-- The 'HasIntLiterals' instance of @'Wrapped' Num@ results in integral
+-- literals and patterns that behave like the stock literals would have,
+-- according to the underlying type's 'Num' instance.
 --
 -- For use with @-XDerivingVia@.  This calls through to the 'fromIntegral' of
 -- the underlying 'Num' instance for the final conversion.  If the type in
@@ -312,15 +317,16 @@ instance (Eq (SNumRepr a), Num (SNumRepr a), SNum a)
 --
 -- @
 --     newtype MyType = MyType Int
---       deriving Num
---       deriving HasIntLiterals via StockLit Int
+--       deriving (Eq, Num)
+--       deriving HasIntLiterals via Wrapped Num MyType
 -- @
 --
 -- Note in this case you could just as well say @deriving HasIntLiterals@ to
 -- get a @GeneralizedNewtypeDeriving@ instance that consumes Int literals and
--- coerces them, but if you wrote a custom Num instance, @via FromIntegral _ _@
+-- coerces them, but if you wrote a custom Num instance, @via Wrapped Num MyType@
 -- will respect it.
 newtype StockLit a = StockLit a
+  deriving HasIntLiterals via Wrapped Num a
 
 class NoConstraint (a :: k)
 instance NoConstraint a
@@ -329,14 +335,14 @@ instance NoConstraint a
 class NoAssertion (a :: Type) (n :: K.Integer)
 instance NoAssertion a n
 
-instance (Eq a, Num a) => HasIntLiterals (StockLit a) where
-  type ReprAssertion (StockLit a) = NoAssertion
-  type LitConstraint (StockLit a) = NoConstraint
-  type LitAssertion (StockLit a) = NoAssertion
+instance (Eq a, Num a) => HasIntLiterals (Wrapped Num a) where
+  type ReprAssertion (Wrapped Num a) = NoAssertion
+  type LitConstraint (Wrapped Num a) = NoConstraint
+  type LitAssertion (Wrapped Num a) = NoAssertion
 
-  unsafeFromInteger _ (Tagged n) = StockLit (fromInteger n)
+  unsafeFromInteger _ (Tagged n) = Wrapped (fromInteger n)
 
-  unsafeMatchInteger _ (Tagged n) (StockLit a) = if fromInteger n == a
+  unsafeMatchInteger _ (Tagged n) (Wrapped a) = if fromInteger n == a
     then CJust
     else CNothing
 
@@ -374,60 +380,61 @@ deriving via SNumLit (SIntLitAssertion n) (SNumber a n)
 
 deriving via SNumLit (FinLitAssertion n) (Fin n) instance HasIntLiterals (Fin n)
 
-deriving via StockLit Integer instance HasIntLiterals Integer
-deriving via StockLit Natural instance HasIntLiterals Natural
-deriving via StockLit (Ratio a) instance Integral a => HasIntLiterals (Ratio a)
+deriving via Wrapped Num Integer instance HasIntLiterals Integer
+deriving via Wrapped Num Natural instance HasIntLiterals Natural
+deriving via Wrapped Num (Ratio a)
+  instance Integral a => HasIntLiterals (Ratio a)
 
-deriving via StockLit Int instance HasIntLiterals Int
-deriving via StockLit Int8 instance HasIntLiterals Int8
-deriving via StockLit Int16 instance HasIntLiterals Int16
-deriving via StockLit Int32 instance HasIntLiterals Int32
-deriving via StockLit Int64 instance HasIntLiterals Int64
+deriving via Wrapped Num Int instance HasIntLiterals Int
+deriving via Wrapped Num Int8 instance HasIntLiterals Int8
+deriving via Wrapped Num Int16 instance HasIntLiterals Int16
+deriving via Wrapped Num Int32 instance HasIntLiterals Int32
+deriving via Wrapped Num Int64 instance HasIntLiterals Int64
 
-deriving via StockLit Word instance HasIntLiterals Word
-deriving via StockLit Word8 instance HasIntLiterals Word8
-deriving via StockLit Word16 instance HasIntLiterals Word16
-deriving via StockLit Word32 instance HasIntLiterals Word32
-deriving via StockLit Word64 instance HasIntLiterals Word64
+deriving via Wrapped Num Word instance HasIntLiterals Word
+deriving via Wrapped Num Word8 instance HasIntLiterals Word8
+deriving via Wrapped Num Word16 instance HasIntLiterals Word16
+deriving via Wrapped Num Word32 instance HasIntLiterals Word32
+deriving via Wrapped Num Word64 instance HasIntLiterals Word64
 
-deriving via StockLit Float instance HasIntLiterals Float
-deriving via StockLit Double instance HasIntLiterals Double
+deriving via Wrapped Num Float instance HasIntLiterals Float
+deriving via Wrapped Num Double instance HasIntLiterals Double
 
-deriving via StockLit (Sum a)
+deriving via Wrapped Num (Sum a)
   instance (Eq a, Num a) => HasIntLiterals (Sum a)
-deriving via StockLit (Product a)
+deriving via Wrapped Num (Product a)
   instance (Eq a, Num a) => HasIntLiterals (Product a)
-deriving via StockLit (Min a)
+deriving via Wrapped Num (Min a)
   instance (Eq a, Num a) => HasIntLiterals (Min a)
-deriving via StockLit (Max a)
+deriving via Wrapped Num (Max a)
   instance (Eq a, Num a) => HasIntLiterals (Max a)
-deriving via StockLit (Const a b)
+deriving via Wrapped Num (Const a b)
   instance (Eq a, Num a) => HasIntLiterals (Const a b)
-deriving via StockLit (Identity a)
+deriving via Wrapped Num (Identity a)
   instance (Eq a, Num a) => HasIntLiterals (Identity a)
 
-deriving via StockLit CChar instance HasIntLiterals CChar
-deriving via StockLit CSChar instance HasIntLiterals CSChar
-deriving via StockLit CUChar instance HasIntLiterals CUChar
-deriving via StockLit CShort instance HasIntLiterals CShort
-deriving via StockLit CUShort instance HasIntLiterals CUShort
-deriving via StockLit CInt instance HasIntLiterals CInt
-deriving via StockLit CUInt instance HasIntLiterals CUInt
-deriving via StockLit CLong instance HasIntLiterals CLong
-deriving via StockLit CULong instance HasIntLiterals CULong
-deriving via StockLit CPtrdiff instance HasIntLiterals CPtrdiff
-deriving via StockLit CSize instance HasIntLiterals CSize
-deriving via StockLit CWchar instance HasIntLiterals CWchar
-deriving via StockLit CSigAtomic instance HasIntLiterals CSigAtomic
-deriving via StockLit CLLong instance HasIntLiterals CLLong
-deriving via StockLit CULLong instance HasIntLiterals CULLong
-deriving via StockLit CBool instance HasIntLiterals CBool
-deriving via StockLit CIntPtr instance HasIntLiterals CIntPtr
-deriving via StockLit CUIntPtr instance HasIntLiterals CUIntPtr
-deriving via StockLit CIntMax instance HasIntLiterals CIntMax
-deriving via StockLit CUIntMax instance HasIntLiterals CUIntMax
-deriving via StockLit CClock instance HasIntLiterals CClock
-deriving via StockLit CTime instance HasIntLiterals CTime
-deriving via StockLit CUSeconds instance HasIntLiterals CUSeconds
-deriving via StockLit CSUSeconds instance HasIntLiterals CSUSeconds
+deriving via Wrapped Num CChar instance HasIntLiterals CChar
+deriving via Wrapped Num CSChar instance HasIntLiterals CSChar
+deriving via Wrapped Num CUChar instance HasIntLiterals CUChar
+deriving via Wrapped Num CShort instance HasIntLiterals CShort
+deriving via Wrapped Num CUShort instance HasIntLiterals CUShort
+deriving via Wrapped Num CInt instance HasIntLiterals CInt
+deriving via Wrapped Num CUInt instance HasIntLiterals CUInt
+deriving via Wrapped Num CLong instance HasIntLiterals CLong
+deriving via Wrapped Num CULong instance HasIntLiterals CULong
+deriving via Wrapped Num CPtrdiff instance HasIntLiterals CPtrdiff
+deriving via Wrapped Num CSize instance HasIntLiterals CSize
+deriving via Wrapped Num CWchar instance HasIntLiterals CWchar
+deriving via Wrapped Num CSigAtomic instance HasIntLiterals CSigAtomic
+deriving via Wrapped Num CLLong instance HasIntLiterals CLLong
+deriving via Wrapped Num CULLong instance HasIntLiterals CULLong
+deriving via Wrapped Num CBool instance HasIntLiterals CBool
+deriving via Wrapped Num CIntPtr instance HasIntLiterals CIntPtr
+deriving via Wrapped Num CUIntPtr instance HasIntLiterals CUIntPtr
+deriving via Wrapped Num CIntMax instance HasIntLiterals CIntMax
+deriving via Wrapped Num CUIntMax instance HasIntLiterals CUIntMax
+deriving via Wrapped Num CClock instance HasIntLiterals CClock
+deriving via Wrapped Num CTime instance HasIntLiterals CTime
+deriving via Wrapped Num CUSeconds instance HasIntLiterals CUSeconds
+deriving via Wrapped Num CSUSeconds instance HasIntLiterals CSUSeconds
 #endif

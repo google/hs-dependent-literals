@@ -13,7 +13,7 @@
 # limitations under the License.
 
 name: dependent-literals-plugin
-version: 0.1.0.0
+version: 0.1.0.1
 category: Constraints
 synopsis: Rewrites integer literals to a pseudo-dependently-typed form.
 description: |
@@ -85,7 +85,8 @@ _test-template: &test-template
     - numeric-kinds >= 0.1 && < 0.2
     - sint >= 0.1 && < 0.2
     - snumber >= 0.1 && < 0.2
-    - dependent-literals >= 0.1 && < 0.2
+    - wrapped >= 0.1 && < 0.2
+    - dependent-literals >= 0.1.1 && < 0.2
     - dependent-literals-plugin
 
 
