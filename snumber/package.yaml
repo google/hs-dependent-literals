@@ -43,3 +43,7 @@ library:
   source-dirs: src
   exposed-modules:
     - Data.SNumber
+
+  when:
+    condition: false
+    other-modules: Paths_snumber

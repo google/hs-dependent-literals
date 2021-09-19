@@ -43,3 +43,7 @@ library:
   exposed-modules:
     - Kinds.Integer
     - Kinds.Num
+
+  when:
+    condition: false
+    other-modules: Paths_numeric_kinds

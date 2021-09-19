@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 2919dbbbf99ba9d33fd461b124667b82a1acf356a7bfc7a0b92eba4232d6fdea
+-- hash: 92c7363bd8a242f6053aac49eafdceaa0547211bd726a26b14899eb45a8e1f1d
 
 name:           dependent-literals-plugin
 version:        0.1.0.1
@@ -58,8 +58,6 @@ flag error_message_tests
 library
   exposed-modules:
       DependentLiterals.Plugin
-  other-modules:
-      Paths_dependent_literals_plugin
   hs-source-dirs:
       src
   build-depends:

@@ -69,6 +69,10 @@ library:
     - ghc >= 8.6 && < 9.1
     - syb >= 0.1 && < 0.8
 
+  when:
+    condition: false
+    other-modules: Paths_dependent_literals_plugin
+
 _test-template: &test-template
   main: Main.hs
   source-dirs: tests
@@ -89,6 +93,9 @@ _test-template: &test-template
     - dependent-literals >= 0.1.1 && < 0.2
     - dependent-literals-plugin
 
+  when:
+    condition: false
+    other-modules: Paths_dependent_literals_plugin
 
 _error-test-template: &error-test-template
   <<: *test-template

@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 05ac8c3fea5a45f8da84a8ec3977066bf0902c70969070e7baab2643ef9c665b
+-- hash: 2e990fc620c55e2edb101b1e0ecce24d97fe329b5981826d0d0ad099f1f4627f
 
 name:           numeric-kinds
 version:        0.1.0.0
@@ -38,8 +38,6 @@ library
   exposed-modules:
     Kinds.Integer
     Kinds.Num
-  other-modules:
-    Paths_numeric_kinds
   hs-source-dirs:
     src
   build-depends:

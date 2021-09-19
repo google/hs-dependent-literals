@@ -45,3 +45,7 @@ library:
     - DependentLiterals
     - DependentLiterals.Bounds
     - DependentLiterals.Int
+
+  when:
+    condition: false
+    other-modules: Paths_dependent_literals
