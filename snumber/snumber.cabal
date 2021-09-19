@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1d0ab9e8374cc94aff152971e0a8de1ddbc04e736cfa1bffd8722cff99b603c6
+-- hash: 180bb77a1d0489edc440c02d6315f4cb602cd744c80590667da6ea1011783376
 
 name:           snumber
 version:        0.1.0.0
@@ -44,5 +44,5 @@ library
       src
   build-depends:
       base >=4.12 && <4.16
-    , numeric-kinds >=0.1 && <0.2
+    , numeric-kinds ==0.1.*
   default-language: Haskell2010
