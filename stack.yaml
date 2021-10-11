@@ -21,8 +21,8 @@ packages:
 - snumber
 
 extra-deps:
-- attenuation-0.1.0.0
-- fin-int-0.1.0.0
+- attenuation-0.2.0
+- fin-int-0.2.0
 - short-vec-0.1.0.0
 - sint-0.1.0.0
 - portray-0.1.0.0

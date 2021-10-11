@@ -35,7 +35,7 @@ dependencies:
   - numeric-kinds >= 0.1 && < 0.2
   - sint >= 0.1 && < 0.2
   - snumber >= 0.1 && < 0.2
-  - fin-int >= 0.1 && < 0.2
+  - fin-int >= 0.1 && < 0.3
   - tagged >= 0.8 && < 0.9
   - wrapped >= 0.1 && < 0.2
 

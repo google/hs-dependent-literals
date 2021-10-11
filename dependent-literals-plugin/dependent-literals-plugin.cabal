@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 92c7363bd8a242f6053aac49eafdceaa0547211bd726a26b14899eb45a8e1f1d
+-- hash: 79f8a295191061b363c7f675490b2299c01863feec8925d956b2778852cd9684
 
 name:           dependent-literals-plugin
 version:        0.1.0.1
@@ -84,7 +84,7 @@ test-suite FinErrors-test
       base >=4.12 && <4.16
     , dependent-literals >=0.1.1 && <0.2
     , dependent-literals-plugin
-    , fin-int ==0.1.*
+    , fin-int >=0.1 && <0.3
     , numeric-kinds ==0.1.*
     , short-vec ==0.1.*
     , sint ==0.1.*
@@ -112,7 +112,7 @@ test-suite IntErrors-test
       base >=4.12 && <4.16
     , dependent-literals >=0.1.1 && <0.2
     , dependent-literals-plugin
-    , fin-int ==0.1.*
+    , fin-int >=0.1 && <0.3
     , numeric-kinds ==0.1.*
     , short-vec ==0.1.*
     , sint ==0.1.*
@@ -156,7 +156,7 @@ test-suite Plugin-test
       base >=4.12 && <4.16
     , dependent-literals >=0.1.1 && <0.2
     , dependent-literals-plugin
-    , fin-int ==0.1.*
+    , fin-int >=0.1 && <0.3
     , numeric-kinds ==0.1.*
     , short-vec ==0.1.*
     , sint ==0.1.*
@@ -182,7 +182,7 @@ test-suite PolyErrors-test
       base >=4.12 && <4.16
     , dependent-literals >=0.1.1 && <0.2
     , dependent-literals-plugin
-    , fin-int ==0.1.*
+    , fin-int >=0.1 && <0.3
     , numeric-kinds ==0.1.*
     , short-vec ==0.1.*
     , sint ==0.1.*
@@ -210,7 +210,7 @@ test-suite SIntErrors-test
       base >=4.12 && <4.16
     , dependent-literals >=0.1.1 && <0.2
     , dependent-literals-plugin
-    , fin-int ==0.1.*
+    , fin-int >=0.1 && <0.3
     , numeric-kinds ==0.1.*
     , short-vec ==0.1.*
     , sint ==0.1.*
@@ -238,7 +238,7 @@ test-suite SNumberErrors-test
       base >=4.12 && <4.16
     , dependent-literals >=0.1.1 && <0.2
     , dependent-literals-plugin
-    , fin-int ==0.1.*
+    , fin-int >=0.1 && <0.3
     , numeric-kinds ==0.1.*
     , short-vec ==0.1.*
     , sint ==0.1.*
@@ -266,7 +266,7 @@ test-suite WordErrors-test
       base >=4.12 && <4.16
     , dependent-literals >=0.1.1 && <0.2
     , dependent-literals-plugin
-    , fin-int ==0.1.*
+    , fin-int >=0.1 && <0.3
     , numeric-kinds ==0.1.*
     , short-vec ==0.1.*
     , sint ==0.1.*

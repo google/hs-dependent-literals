@@ -84,7 +84,7 @@ _test-template: &test-template
     - TypeApplications
   ghc-options: [-fplugin=DependentLiterals.Plugin]
   dependencies:
-    - fin-int >= 0.1 && < 0.2
+    - fin-int >= 0.1 && < 0.3
     - short-vec >= 0.1 && < 0.2
     - numeric-kinds >= 0.1 && < 0.2
     - sint >= 0.1 && < 0.2
