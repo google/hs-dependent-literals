@@ -3,12 +3,10 @@ cabal-version: 1.12
 -- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
---
--- hash: 71727e36801bd4c4eec91b6a5e46458110fa33e0447562bdaf32edb8d67b405f
 
 name:           snumber
 version:        0.1.0.0
-synopsis:       Indexed numeric types linking type-level and value-level numbers.
+synopsis:       Integer singletons with flexible representation
 description:    This provides singletons-style witnesses for type-level integers, and some
                 limited arithmetic operations on them.  Instead of working with (invisible,
                 implicitly-passed) 'KnownNat' instances, you can work with (visible,

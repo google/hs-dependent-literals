@@ -15,7 +15,7 @@
 name: numeric-kinds
 version: 0.1.0.0
 category: Numeric
-synopsis: Type-level numeric types, classes, and instances.
+synopsis: Type-level numeric types and classes
 description: |
   This provides numeric types meant for use at the type level with -XDataKinds,
   along with type families that act like type-level typeclasses providing

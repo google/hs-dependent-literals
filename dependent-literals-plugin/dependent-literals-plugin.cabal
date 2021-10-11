@@ -3,12 +3,10 @@ cabal-version: 1.12
 -- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
---
--- hash: 79f8a295191061b363c7f675490b2299c01863feec8925d956b2778852cd9684
 
 name:           dependent-literals-plugin
 version:        0.1.0.1
-synopsis:       Rewrites integer literals to a pseudo-dependently-typed form.
+synopsis:       Dependent integer literals
 description:    This plugin implements pseudo-dependently-typed integer literals.
                 .
                 This means the value of an integer literal is available at the type level,

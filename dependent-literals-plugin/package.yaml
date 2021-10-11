@@ -15,7 +15,7 @@
 name: dependent-literals-plugin
 version: 0.1.0.1
 category: Constraints
-synopsis: Rewrites integer literals to a pseudo-dependently-typed form.
+synopsis: Dependent integer literals
 description: |
   This plugin implements pseudo-dependently-typed integer literals.
 

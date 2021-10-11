@@ -15,7 +15,7 @@
 name: snumber
 version: 0.1.0.0
 category: Constraints
-synopsis: Indexed numeric types linking type-level and value-level numbers.
+synopsis: Integer singletons with flexible representation
 description: |
   This provides singletons-style witnesses for type-level integers, and some
   limited arithmetic operations on them.  Instead of working with (invisible,
