@@ -88,7 +88,7 @@ _test-template: &test-template
     - short-vec >= 0.1 && < 0.2
     - numeric-kinds >= 0.1 && < 0.2
     - sint >= 0.1 && < 0.2
-    - snumber >= 0.1 && < 0.2
+    - snumber >= 0.1 && < 0.3
     - wrapped >= 0.1 && < 0.2
     - dependent-literals >= 0.1.1 && < 0.2
     - dependent-literals-plugin

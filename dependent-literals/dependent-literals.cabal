@@ -39,7 +39,7 @@ library
     , fin-int >=0.1 && <0.3
     , numeric-kinds ==0.1.*
     , sint ==0.1.*
-    , snumber ==0.1.*
+    , snumber >=0.1 && <0.3
     , tagged ==0.8.*
     , wrapped ==0.1.*
   default-language: Haskell2010

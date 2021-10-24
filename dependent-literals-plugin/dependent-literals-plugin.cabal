@@ -86,7 +86,7 @@ test-suite FinErrors-test
     , numeric-kinds ==0.1.*
     , short-vec ==0.1.*
     , sint ==0.1.*
-    , snumber ==0.1.*
+    , snumber >=0.1 && <0.3
     , wrapped ==0.1.*
   if !flag(error_message_tests)
     buildable: False
@@ -114,7 +114,7 @@ test-suite IntErrors-test
     , numeric-kinds ==0.1.*
     , short-vec ==0.1.*
     , sint ==0.1.*
-    , snumber ==0.1.*
+    , snumber >=0.1 && <0.3
     , wrapped ==0.1.*
   if !flag(error_message_tests)
     buildable: False
@@ -158,7 +158,7 @@ test-suite Plugin-test
     , numeric-kinds ==0.1.*
     , short-vec ==0.1.*
     , sint ==0.1.*
-    , snumber ==0.1.*
+    , snumber >=0.1 && <0.3
     , wrapped ==0.1.*
   default-language: Haskell2010
 
@@ -184,7 +184,7 @@ test-suite PolyErrors-test
     , numeric-kinds ==0.1.*
     , short-vec ==0.1.*
     , sint ==0.1.*
-    , snumber ==0.1.*
+    , snumber >=0.1 && <0.3
     , wrapped ==0.1.*
   if !flag(error_message_tests)
     buildable: False
@@ -212,7 +212,7 @@ test-suite SIntErrors-test
     , numeric-kinds ==0.1.*
     , short-vec ==0.1.*
     , sint ==0.1.*
-    , snumber ==0.1.*
+    , snumber >=0.1 && <0.3
     , wrapped ==0.1.*
   if !flag(error_message_tests)
     buildable: False
@@ -240,7 +240,7 @@ test-suite SNumberErrors-test
     , numeric-kinds ==0.1.*
     , short-vec ==0.1.*
     , sint ==0.1.*
-    , snumber ==0.1.*
+    , snumber >=0.1 && <0.3
     , wrapped ==0.1.*
   if !flag(error_message_tests)
     buildable: False
@@ -268,7 +268,7 @@ test-suite WordErrors-test
     , numeric-kinds ==0.1.*
     , short-vec ==0.1.*
     , sint ==0.1.*
-    , snumber ==0.1.*
+    , snumber >=0.1 && <0.3
     , wrapped ==0.1.*
   if !flag(error_message_tests)
     buildable: False
