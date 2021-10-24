@@ -116,6 +116,12 @@ jobs:
             !${{ steps.setup-stack.outputs.stack-root }}/programs/*/*.tar.xz
           key: ${{ env.ghc-cache-ver}}-${{ runner.os }}-${{ matrix.build.compiler }}
 
+      # Explicitly fetch the Hackage index to make sure we notice any metadata
+      # revisions.  Do this /before/ stack setup, since that's when Stack locks
+      # down its choices to a particular cabal file sha256sum in its lockfile.
+      - name: Update Hackage Index
+        run: $STACK update
+
       # Now do stack setup, which should do as little cabal-file-indexing work
       # as possible.
       - name: Pre-install GHC with Stack
