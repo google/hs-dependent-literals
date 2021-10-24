@@ -40,10 +40,13 @@
 
 module Data.SNumber
          ( -- * SNumber
-           SNumber(N#, SNumber, unSNumber), SNumberRepr(..)
+           SNumber(SNumber, N#, SN, unSNumber), SNumberRepr(..)
 
            -- ** Creation
-         , snumber, trySNumber, unsafeUncheckedSNumber
+         , snumber, trySNumber
+
+           -- *** Unsafe
+         , unsafeUncheckedSNumber
          , unsafeMkSNumber, unsafeTryMkSNumber, unsafeUncheckedMkSNumber
 
            -- ** Existentials
@@ -195,8 +198,20 @@ type role SNumber nominal nominal
 -- that it isn't actualy a newtype constructor, so having it in scope doesn't
 -- allow unsound coercions across 'SNumber' types.
 pattern N# :: forall (n :: K.Integer) a. a -> SNumber a n
-pattern N# {unSNumber} = MkSNumber# unSNumber
+pattern N# x = MkSNumber# x
 {-# COMPLETE N# #-}
+
+-- | A unidirectional pattern for matching 'SNumber's.
+--
+-- This allows the pseudo-field-selector 'unSNumber' to be exported bundled
+-- with 'SNumber', so it can be imported by `SNumber(..)` as if it were a
+-- normal field selector of a record definition.  If this were done as part of
+-- 'N#', it'd allow unsafely changing an 'SNumber''s representation without
+-- using any identifiers that indicate unsafety, by way of record update
+-- syntax.
+pattern SN :: forall n a. a -> SNumber a n
+pattern SN {unSNumber} <- MkSNumber# unSNumber
+{-# COMPLETE SN #-}
 
 data KnownSNumberDict a n = KnownSNumber a n => KnownSNumberDict
 
