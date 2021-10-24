@@ -13,7 +13,7 @@
 # limitations under the License.
 
 name: snumber
-version: 0.1.0.0
+version: 0.2.0
 category: Constraints
 synopsis: Integer singletons with flexible representation
 description: |
