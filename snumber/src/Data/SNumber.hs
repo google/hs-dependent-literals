@@ -204,12 +204,12 @@ pattern N# x = MkSNumber# x
 -- | A unidirectional pattern for matching 'SNumber's.
 --
 -- This allows the pseudo-field-selector 'unSNumber' to be exported bundled
--- with 'SNumber', so it can be imported by `SNumber(..)` as if it were a
+-- with 'SNumber', so it can be imported by @SNumber(..)@ as if it were a
 -- normal field selector of a record definition.  If this were done as part of
--- 'N#', it'd allow unsafely changing an 'SNumber''s representation without
+-- 'N#', it'd allow unsafely changing an 'SNumber'\'s representation without
 -- using any identifiers that indicate unsafety, by way of record update
 -- syntax.
-pattern SN :: forall n a. a -> SNumber a n
+pattern SN :: forall (n :: K.Integer) a. a -> SNumber a n
 pattern SN {unSNumber} <- MkSNumber# unSNumber
 {-# COMPLETE SN #-}
 
