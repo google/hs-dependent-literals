@@ -85,7 +85,7 @@ test-suite FinErrors-test
     , fin-int >=0.1 && <0.3
     , numeric-kinds ==0.1.*
     , short-vec ==0.1.*
-    , sint ==0.1.*
+    , sint >=0.1 && <0.3
     , snumber >=0.1 && <0.3
     , wrapped ==0.1.*
   if !flag(error_message_tests)
@@ -113,7 +113,7 @@ test-suite IntErrors-test
     , fin-int >=0.1 && <0.3
     , numeric-kinds ==0.1.*
     , short-vec ==0.1.*
-    , sint ==0.1.*
+    , sint >=0.1 && <0.3
     , snumber >=0.1 && <0.3
     , wrapped ==0.1.*
   if !flag(error_message_tests)
@@ -157,7 +157,7 @@ test-suite Plugin-test
     , fin-int >=0.1 && <0.3
     , numeric-kinds ==0.1.*
     , short-vec ==0.1.*
-    , sint ==0.1.*
+    , sint >=0.1 && <0.3
     , snumber >=0.1 && <0.3
     , wrapped ==0.1.*
   default-language: Haskell2010
@@ -183,7 +183,7 @@ test-suite PolyErrors-test
     , fin-int >=0.1 && <0.3
     , numeric-kinds ==0.1.*
     , short-vec ==0.1.*
-    , sint ==0.1.*
+    , sint >=0.1 && <0.3
     , snumber >=0.1 && <0.3
     , wrapped ==0.1.*
   if !flag(error_message_tests)
@@ -211,7 +211,7 @@ test-suite SIntErrors-test
     , fin-int >=0.1 && <0.3
     , numeric-kinds ==0.1.*
     , short-vec ==0.1.*
-    , sint ==0.1.*
+    , sint >=0.1 && <0.3
     , snumber >=0.1 && <0.3
     , wrapped ==0.1.*
   if !flag(error_message_tests)
@@ -239,7 +239,7 @@ test-suite SNumberErrors-test
     , fin-int >=0.1 && <0.3
     , numeric-kinds ==0.1.*
     , short-vec ==0.1.*
-    , sint ==0.1.*
+    , sint >=0.1 && <0.3
     , snumber >=0.1 && <0.3
     , wrapped ==0.1.*
   if !flag(error_message_tests)
@@ -267,7 +267,7 @@ test-suite WordErrors-test
     , fin-int >=0.1 && <0.3
     , numeric-kinds ==0.1.*
     , short-vec ==0.1.*
-    , sint ==0.1.*
+    , sint >=0.1 && <0.3
     , snumber >=0.1 && <0.3
     , wrapped ==0.1.*
   if !flag(error_message_tests)
