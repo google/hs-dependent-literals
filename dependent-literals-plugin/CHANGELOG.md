@@ -1,3 +1,7 @@
+# 0.1.0.2 (2021-11-04)
+
+* Add support for GHC-9.2.1.
+
 # 0.1.0.1 (2021-09-09)
 
 * Updated tests to use `Wrapped Num` rather than `StockLit`.

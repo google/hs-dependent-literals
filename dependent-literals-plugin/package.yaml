@@ -13,7 +13,7 @@
 # limitations under the License.
 
 name: dependent-literals-plugin
-version: 0.1.0.1
+version: 0.1.0.2
 category: Constraints
 synopsis: Dependent integer literals
 description: |
@@ -53,7 +53,7 @@ extra-source-files:
   CHANGELOG.md
 
 dependencies:
-  - base >= 4.12 && < 4.16
+  - base >= 4.12 && < 4.17
 
 flags:
   error_message_tests:
@@ -66,7 +66,7 @@ library:
   exposed-modules:
     - DependentLiterals.Plugin
   dependencies:
-    - ghc >= 8.6 && < 9.1
+    - ghc >= 8.6 && < 9.3
     - syb >= 0.1 && < 0.8
 
   when:
