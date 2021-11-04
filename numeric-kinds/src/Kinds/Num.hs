@@ -22,6 +22,7 @@
 -- we can't group methods into classes that must be implemented all-or-none,
 -- but in practice this seems to be okay.
 
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE NoStarIsType #-}
@@ -31,7 +32,7 @@
 
 module Kinds.Num
          ( -- * Comparisons
-           Cmp
+           Cmp, Compare
          , type (<?), type (<=?), type (==?), type (/=?), type (>=?), type (>?)
 
            -- ** Inequality Constraints
@@ -44,25 +45,41 @@ module Kinds.Num
          , type (+), type (-), type (*)
 
            -- * Utility
-         , Proven, IsLT, IsLE, IsGT, IsGE, IsEQ, IsNE
+         , Proven, OrdCond
          ) where
 
 import Prelude hiding (Integer)
 
-import GHC.TypeNats (CmpNat, Nat)
+import GHC.TypeNats (Nat)
 import qualified GHC.TypeNats as N (type (+), type (-), type (*))
 
 import {-# source #-}  Kinds.Integer (Integer(..))
+
+#if MIN_VERSION_base(4, 16, 0)
+import Data.Type.Ord
+         ( Compare, OrdCond
+         , type (<?), type (>?), type (<=?), type (>=?)
+         , type (<=), type (>=), type (>)
+         )
+#else
+import GHC.TypeNats (CmpNat)
 
 -- | Type-level Ord "kindclass".
 --
 -- Note this has an invisible dependent @k@ parameter that makes the
 -- textually-identical instances for different kinds actually different.  Neat!
-type family Cmp (x :: k) (y :: k) :: Ordering
+type family Compare (x :: k) (y :: k) :: Ordering
 
--- That is, this is @Cmp {k=Nat} x y@, which is distinct from
--- @Cmp {k=Integer} x y@, even though both of them are written as @Cmp x y@.
-type instance Cmp {- k=Nat -} x y = CmpNat x y
+-- That is, this is @Compare {k=Nat} x y@, which is distinct from
+-- @Compare {k=Integer} x y@, even though both of them are written as
+-- @Compare x y@.
+type instance Compare {- k=Nat -} x y = CmpNat x y
+#endif
+
+-- | Backwards-compatibility alias for 'Compare'.
+--
+-- Prefer 'Compare' over this.
+type Cmp x y = Compare x y
 
 -- | Type-level numeric conversion from 'Nat'.  Like 'fromInteger' in 'Num'.
 type family FromNat (n :: Nat) :: k
@@ -89,53 +106,46 @@ type family (x :: k) * (y :: k) :: k
 
 type instance x * y = (N.*) x y
 
-infix 4 <?, >?, <=?, >=?, ==?, /=?
+-- Recently added to base.
+#if !MIN_VERSION_base(4, 16, 0)
 
-type x <?  y = IsLT (Cmp x y)
-type x >?  y = IsGT (Cmp x y)
-type x <=? y = IsLE (Cmp x y)
-type x >=? y = IsGE (Cmp x y)
-type x ==? y = IsEQ (Cmp x y)
-type x /=? y = IsNE (Cmp x y)
+-- | Type-level eliminator for 'Ordering'.
+--
+-- @OrdCond o lt eq gt@ selects from among @lt@, @eq@, and @gt@ according
+-- to @o@.
+type family OrdCond (o :: Ordering) (lt :: k) (eq :: k) (gt :: k) :: k where
+  OrdCond 'LT lt eq gt = lt
+  OrdCond 'EQ lt eq gt = eq
+  OrdCond 'GT lt eq gt = gt
+
+infix 4 <?, >?, <=?, >=?
+
+type x <?  y = OrdCond (Compare x y) True False False
+type x >?  y = OrdCond (Compare x y) False False True
+type x <=? y = OrdCond (Compare x y) True True False
+type x >=? y = OrdCond (Compare x y) False True True
+#endif
+
+infix ==?, /=?
+
+type x ==? y = OrdCond (Compare x y) False True False
+type x /=? y = OrdCond (Compare x y) True False True
 
 -- | Turns a type-level 'Bool' into a 'Data.Kind.Constraint' that it's 'True'.
 type Proven b = b ~ 'True
 
-infix 4 <, >, <=, >=, ==, /=
+-- Recently added to base.
+#if !MIN_VERSION_base(4, 16, 0)
+infix 4 <=, >=, >
 
-type x <  y = Cmp x y ~ 'LT
-type x >  y = Cmp x y ~ 'GT
-type x == y = Cmp x y ~ 'EQ
 type x <= y = Proven (x <=? y)
 type x >= y = Proven (x >=? y)
+type x >  y = Proven (x >? y)
+#endif
+
+infix 4 <, ==, /=
+
+-- The base-4.16.0.0 version of (<) is wrong.
+type x <  y = Proven (x <? y)
+type x == y = Proven (x ==? y)
 type x /= y = Proven (x /=? y)
-
--- | Test whether an 'Ordering' is 'LT'.
-type family IsLT o where
-  IsLT 'LT = 'True
-  IsLT o   = 'False
-
--- | Test whether an 'Ordering' is 'LT' or 'EQ'.
-type family IsLE o where
-  IsLE 'GT = 'False
-  IsLE o   = 'True
-
--- | Test whether an 'Ordering' is 'GT'.
-type family IsGT o where
-  IsGT 'GT = 'True
-  IsGT o   = 'False
-
--- | Test whether an 'Ordering' is 'GT' or 'EQ'.
-type family IsGE o where
-  IsGE 'LT = 'False
-  IsGE o   = 'True
-
--- | Test whether an 'Ordering' is 'EQ'.
-type family IsEQ o where
-  IsEQ 'EQ = 'True
-  IsEQ o   = 'False
-
--- | Test whether an 'Ordering' is 'LT' or 'GT'.
-type family IsNE o where
-  IsNE 'EQ = 'False
-  IsNE o   = 'True

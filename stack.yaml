@@ -30,4 +30,4 @@ extra-deps:
 - wrapped-0.1.0.0
 
 ghc-options:
-  "$locals": -Wall -Werror
+  "$locals": -Wall -Werror -Wno-unticked-promoted-constructors

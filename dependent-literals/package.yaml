@@ -13,7 +13,7 @@
 # limitations under the License.
 
 name: dependent-literals
-version: 0.1.1.0
+version: 0.2.0
 category: Constraints
 synopsis: Library for dependent-literals-plugin
 description: |
@@ -32,7 +32,7 @@ extra-source-files:
 
 dependencies:
   - base >= 4.12 && < 4.17
-  - numeric-kinds >= 0.1 && < 0.2
+  - numeric-kinds >= 0.1 && < 0.3
   - sint >= 0.1 && < 0.3
   - snumber >= 0.1 && < 0.3
   - fin-int >= 0.1 && < 0.3

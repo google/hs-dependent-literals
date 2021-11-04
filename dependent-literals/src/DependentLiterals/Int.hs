@@ -92,7 +92,7 @@ import Data.SNumber (SafeSNumber, SNumber(N#), sameSNumber, unsafeMkSNumber)
 import Data.Tagged (Tagged(..))
 import Data.Wrapped (Wrapped(..))
 import Kinds.Integer (type (-#), KnownInteger(..), pattern Pos)
-import Kinds.Num (type (>=), type (<), Cmp, ToInteger)
+import Kinds.Num (type (>=), type (<), ToInteger)
 import qualified Kinds.Integer as K (Integer)
 import Data.Fin.Int (Fin, finToInt, unsafeFin)
 
@@ -149,9 +149,9 @@ instance SNum (SNumber a n) where
   fromSNum (Satisfying x) = x
   intoSNum = Satisfying
 
-class (Cmp n ('Pos m) ~ 'LT, n >= 'Pos 0)
+class (n < 'Pos m, n >= 'Pos 0)
    => FinInBounds (m :: Nat) (n :: K.Integer)
-instance (Cmp n ('Pos m) ~ 'LT, n >= 'Pos 0) => FinInBounds m n
+instance (n < 'Pos m, n >= 'Pos 0) => FinInBounds m n
 
 instance SNum (Fin n) where
   type SNumRepr (Fin n) = Int

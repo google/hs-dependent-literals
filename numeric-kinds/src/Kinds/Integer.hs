@@ -52,9 +52,6 @@ module Kinds.Integer
            -- * Axioms
          , plusMinusInverseL, plusMinusInverseR
          , mulCommutes
-
-           -- * Utility
-         , CaseOrdering
          ) where
 
 import Prelude hiding (Integer)
@@ -65,7 +62,10 @@ import GHC.Exts (proxy#)
 import GHC.TypeNats (KnownNat, Nat, natVal')
 import Unsafe.Coerce (unsafeCoerce)
 
-import Kinds.Num (type (+), type (-), type (*), Cmp, FromNat, ToInteger)
+import Kinds.Num
+         ( type (+), type (-), type (*)
+         , Compare, FromNat, ToInteger, OrdCond
+         )
 
 -- | Type-level signed numbers
 data Integer = Pos Nat | Neg Nat
@@ -84,7 +84,7 @@ instance KnownNat n => KnownInteger ('Neg n) where
           then error "illegal KnownInteger (-0)"
           else negate $ toInteger x
 
-type instance Cmp {- k=Integer -} x y = CmpInteger x y
+type instance Compare {- k=Integer -} x y = CmpInteger x y
 type instance FromNat {- k=Integer -} n = 'Pos n
 
 type instance ToInteger {- k=Integer -} n = n
@@ -97,27 +97,17 @@ type instance x * y = MulInteger x y
 
 -- | Comparison of type-level integers.
 type family CmpInteger m n where
-  CmpInteger ('Pos m) ('Pos n) = Cmp m n
+  CmpInteger ('Pos m) ('Pos n) = Compare m n
   CmpInteger ('Pos 0) ('Neg 0) = 'EQ
   CmpInteger ('Pos m) ('Neg n) = 'GT
   CmpInteger ('Neg 0) ('Pos 0) = 'EQ
   CmpInteger ('Neg m) ('Pos n) = 'LT
-  CmpInteger ('Neg m) ('Neg n) = Cmp n m -- Note: reversed
-
--- | Type-level eliminator for 'Ordering'.
---
--- @CaseOrdering o lt eq gt@ selects from among @lt@, @eq@, and @gt@ according
--- to @o@.  This is primarily exported so Haddock doesn't complain about being
--- unable to link it when it's mentioned in type instance clauses.
-type family CaseOrdering (o :: Ordering) (lt :: k) (eq :: k) (gt :: k) :: k where
-  CaseOrdering 'LT lt eq gt = lt
-  CaseOrdering 'EQ lt eq gt = eq
-  CaseOrdering 'GT lt eq gt = gt
+  CmpInteger ('Neg m) ('Neg n) = Compare n m -- Note: reversed
 
 -- | Given two 'Nat's @m@ and @n@, computes @m - n@ as an 'Integer'.
 type family (m :: Nat) -# (n :: Nat) where
   -- Redundant cases solely to make sure we get stuck reducing '-#' rather
-  -- than reducing @CaseOrdering (Cmp m n) tons of junk@ when the magnitude is
+  -- than reducing @OrdCond (Compare m n) tons of junk@ when the magnitude is
   -- a type variable.  This is similar to adding a bang pattern or case
   -- statement to a term-level function to make it strict in its arguments; but
   -- we don't have case statements or bang patterns in type families, so we add
@@ -125,7 +115,7 @@ type family (m :: Nat) -# (n :: Nat) where
   n -# 0 = 'Pos n  -- Order matters: 0 -# 0 should be 'Pos 0
   0 -# n = 'Neg n
 
-  m -# n = CaseOrdering (Cmp m n)
+  m -# n = OrdCond (Compare m n)
     ('Neg (n - m))
     ('Pos 0)
     ('Pos (m - n))

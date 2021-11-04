@@ -37,7 +37,7 @@ extra-source-files:
 
 dependencies:
   - base >= 4.12 && < 4.17
-  - numeric-kinds >= 0.1 && < 0.2
+  - numeric-kinds >= 0.1 && < 0.3
 
 library:
   source-dirs: src

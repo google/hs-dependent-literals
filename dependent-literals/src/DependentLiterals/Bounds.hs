@@ -56,7 +56,7 @@ import Data.Kind (Constraint, Type)
 import GHC.TypeLits (TypeError, ErrorMessage(..))
 
 import Kinds.Integer (pattern Pos, pattern Neg)
-import Kinds.Num (type (-), type (>=?), type (<), type (>=), Cmp)
+import Kinds.Num (type (-), type (>=?), type (<?), type (<), type (>=))
 import qualified Kinds.Integer as K (Integer)
 
 type family ShowNum (n :: K.Integer) where
@@ -103,7 +103,7 @@ class (n < maxp1)
         (maxp1 :: K.Integer)
         (a :: Type)
         (n :: K.Integer)
-instance AssertNotApart msg (Cmp n maxp1) 'LT
+instance AssertNotApart msg (n <? maxp1) 'True
       => CheckLessThanMaxBound msg maxp1 a n
 
 class (n >= min)

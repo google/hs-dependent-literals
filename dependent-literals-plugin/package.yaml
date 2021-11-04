@@ -86,11 +86,11 @@ _test-template: &test-template
   dependencies:
     - fin-int >= 0.1 && < 0.3
     - short-vec >= 0.1 && < 0.2
-    - numeric-kinds >= 0.1 && < 0.2
+    - numeric-kinds >= 0.1 && < 0.3
     - sint >= 0.1 && < 0.3
     - snumber >= 0.1 && < 0.3
     - wrapped >= 0.1 && < 0.2
-    - dependent-literals >= 0.1.1 && < 0.2
+    - dependent-literals >= 0.1.1 && < 0.3
     - dependent-literals-plugin
 
   when:

@@ -5,7 +5,7 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           numeric-kinds
-version:        0.1.0.0
+version:        0.2.0
 synopsis:       Type-level numeric types and classes
 description:    This provides numeric types meant for use at the type level with -XDataKinds,
                 along with type families that act like type-level typeclasses providing

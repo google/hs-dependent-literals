@@ -5,7 +5,7 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           dependent-literals
-version:        0.1.1.0
+version:        0.2.0
 synopsis:       Library for dependent-literals-plugin
 description:    This is the library counterpart of
                 <https://hackage.haskell.org/package/dependent-literals-plugin dependent-literals-plugin>.
@@ -37,7 +37,7 @@ library
   build-depends:
       base >=4.12 && <4.17
     , fin-int >=0.1 && <0.3
-    , numeric-kinds ==0.1.*
+    , numeric-kinds >=0.1 && <0.3
     , sint >=0.1 && <0.3
     , snumber >=0.1 && <0.3
     , tagged ==0.8.*
