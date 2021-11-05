@@ -15,6 +15,7 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
@@ -36,6 +37,9 @@ module Kinds.Ord
            -- ** Selection
          , Max, Min
 
+           -- ** Proof Witnesses
+         , OrderingI(..)
+
            -- * Utility
          , Proven, OrdCond, CompareCond
          ) where
@@ -45,7 +49,7 @@ import Data.Type.Ord
          ( Compare, OrdCond
          , type (<?), type (>?), type (<=?), type (>=?)
          , type (<=), type (>=), type (>)
-         , Max, Min
+         , Max, Min, OrderingI(..)
          )
 #else
 import GHC.TypeLits (CmpNat)
@@ -112,4 +116,10 @@ type x /= y = Proven (x /=? y)
 #if !MIN_VERSION_base(4, 16, 0)
 type Min x y = CompareCond x y x x y
 type Max x y = CompareCond x y y y x
+
+-- | Ordering results carrying evidence of type-level ordering relations.
+data OrderingI m n where
+  LTI :: Compare m n ~ 'LT => OrderingI m n
+  EQI :: Compare m m ~ 'EQ => OrderingI m m
+  GTI :: Compare m n ~ 'GT => OrderingI m n
 #endif

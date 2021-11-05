@@ -1,6 +1,7 @@
-# 0.2.0.1 (2021-11-05)
+# 0.3.0 (2021-11-05)
 
 * Get type-level `Ord` from the new `type-compare` compatibility library.
+* Get 'SOrdering` from `type-compare` under the new name `OrderingI`.
 
 # 0.2.0 (2021-10-24)
 

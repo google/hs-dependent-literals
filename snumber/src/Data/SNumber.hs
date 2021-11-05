@@ -53,7 +53,7 @@ module Data.SNumber
          , SomeSNumber(..), someSNumberVal, withSNumber
 
            -- ** Comparison
-         , SOrdering(..), compareSNumber, sameSNumber
+         , compareSNumber, sameSNumber
 
            -- ** Arithmetic
          , OverflowArith(..)
@@ -97,6 +97,7 @@ import Data.SNumber.Internal
          )
 import Kinds.Integer (CmpInteger, KnownInteger(..), pattern Pos, pattern Neg)
 import qualified Kinds.Integer as K (Integer)
+import Kinds.Ord (OrderingI(..))
 import Kinds.Num (type (+), type (-), type (*))
 
 #include "MachDeps.h"
@@ -110,6 +111,7 @@ import Kinds.Num (type (+), type (-), type (*))
 -- * @CmpInteger m n ~ 'EQ@ iff @compare m n == EQ@.
 -- * @CmpInteger m n ~ 'GT@ iff @compare m n == GT@.
 -- * @toInteger n == integerVal \@n@
+-- * @a@ upholds the 'Ord' laws.
 --
 -- These are exactly the set of things we're willing to 'unsafeCoerce' proofs
 -- for.  It is /unsafe/ to construct an 'SNumber' that violates these by any
@@ -396,21 +398,16 @@ snumberVal = snumberVal_
 
 -- TODO(awpr): Expose these functions as GEq/GOrd instances.
 
--- | Ordering results carrying evidence of type-level ordering relations.
-data SOrdering m n where
-  SLT :: CmpInteger m n ~ 'LT => SOrdering m n
-  -- | This doesn't currently prove m ~ n, but since we've forbidden SNumbers
-  -- of @'Neg 0@, it probably could.
-  SEQ :: CmpInteger m n ~ 'EQ => SOrdering m n
-  SGT :: CmpInteger m n ~ 'GT => SOrdering m n
-
 -- | Compare two type-level 'Integer's using their runtime witnesses.
 compareSNumber
-  :: forall m n a. Ord a => SNumber a m -> SNumber a n -> SOrdering m n
+  :: forall m n a. Ord a => SNumber a m -> SNumber a n -> OrderingI m n
 compareSNumber (N# x) (N# y) = case compare x y of
-  LT -> case unsafeCoerce Refl :: CmpInteger m n :~: 'LT of Refl -> SLT
-  EQ -> case unsafeCoerce Refl :: CmpInteger m n :~: 'EQ of Refl -> SEQ
-  GT -> case unsafeCoerce Refl :: CmpInteger m n :~: 'GT of Refl -> SGT
+  LT -> case unsafeCoerce Refl :: CmpInteger m n :~: 'LT of Refl -> LTI
+  EQ ->
+    case unsafeCoerce Refl :: CmpInteger m n :~: 'EQ of
+      Refl -> case unsafeCoerce Refl :: m :~: n of
+        Refl -> EQI
+  GT -> case unsafeCoerce Refl :: CmpInteger m n :~: 'GT of Refl -> GTI
 
 -- | Test equality of two type-level 'Integer's using their runtime witnesses.
 sameSNumber :: Eq a => SNumber a m -> SNumber a n -> Maybe (m :~: n)

@@ -5,7 +5,7 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           type-compare
-version:        0.1.0
+version:        0.1.1
 synopsis:       Type-level Ord compatibility layer
 description:    In @base-4.16.0.0@, an open type family @Compare@ was added as a type-level
                 analog of @Ord@.  This package provides a compatible interface on earlier
