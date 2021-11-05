@@ -56,7 +56,8 @@ import Data.Kind (Constraint, Type)
 import GHC.TypeLits (TypeError, ErrorMessage(..))
 
 import Kinds.Integer (pattern Pos, pattern Neg)
-import Kinds.Num (type (-), type (>=?), type (<?), type (<), type (>=))
+import Kinds.Num (type (-))
+import Kinds.Ord (type (>=?), type (<?), type (<), type (>=))
 import qualified Kinds.Integer as K (Integer)
 
 type family ShowNum (n :: K.Integer) where

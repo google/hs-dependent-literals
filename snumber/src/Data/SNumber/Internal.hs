@@ -33,7 +33,8 @@ import GHC.TypeLits (TypeError, ErrorMessage(..))
 
 import Prelude hiding (Integer) -- No term-level stuff in this module anyway.
 import Kinds.Integer (Integer(..))
-import Kinds.Num (type (-), type (<?), type (>=?), Cmp)
+import Kinds.Num (type (-))
+import Kinds.Ord (type (<?), type (>=?), Compare)
 
 type family ShowNum (n :: Integer) where
   ShowNum ('Pos n) = 'ShowType n
@@ -89,7 +90,7 @@ class IsLessThanMaxBound
         (maxp1 :: Integer)
         (err :: Integer -> Constraint)
         (n :: Integer)
-instance AssertLessThanMaxBound (Reduce (Cmp n maxp1)) n maxp1 (err n)
+instance AssertLessThanMaxBound (Reduce (Compare n maxp1)) n maxp1 (err n)
       => IsLessThanMaxBound maxp1 err n
 
 -- | Assert that a numeric literal is greater than the (negative) min bound.
@@ -103,7 +104,7 @@ class IsAtLeastMinBound
         (min :: Integer)
         (err :: Integer -> Constraint)
         (n :: Integer)
-instance AssertAtLeastMinBound (Reduce (Cmp n min)) n min (err n)
+instance AssertAtLeastMinBound (Reduce (Compare n min)) n min (err n)
       => IsAtLeastMinBound min err n
 
 type family ErrorIfNegZero n :: Constraint where

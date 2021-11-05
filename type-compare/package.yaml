@@ -1,4 +1,4 @@
-# Copyright 2021 Google LLC
+# Copyright 2020-2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,19 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: dependent-literals
-version: 0.2.0
-category: Constraints
-synopsis: Library for dependent-literals-plugin
+name: type-compare
+version: 0.1.0
+category: Type
+synopsis: Type-level Ord compatibility layer
 description: |
-  This is the library counterpart of
-  <https://hackage.haskell.org/package/dependent-literals-plugin dependent-literals-plugin>.
-  See that package's description for more details.
+  In @base-4.16.0.0@, an open type family @Compare@ was added as a type-level
+  analog of @Ord@.  This package provides a compatible interface on earlier
+  versions of @base@, and re-exports the canonical one with later versions.
 license: Apache-2.0
 author: Andrew Pritchard <awpr@google.com>
-copyright: 2019-2021 Google LLC
+copyright: 2021 Google LLC
 maintainer: Andrew Pritchard <awpr@google.com>
-github: google/hs-dependent-literals/dependent-literals
+github: google/hs-dependent-literals/type-compare
 
 # Note: this causes CHANGELOG.md to be included in Hackage distributions.
 extra-source-files:
@@ -32,21 +32,12 @@ extra-source-files:
 
 dependencies:
   - base >= 4.12 && < 4.17
-  - fin-int >= 0.1 && < 0.3
-  - numeric-kinds >= 0.1 && < 0.3
-  - sint >= 0.1 && < 0.3
-  - snumber >= 0.1 && < 0.3
-  - tagged >= 0.8 && < 0.9
-  - type-compare >= 0.1 && < 0.2
-  - wrapped >= 0.1 && < 0.2
 
 library:
   source-dirs: src
   exposed-modules:
-    - DependentLiterals
-    - DependentLiterals.Bounds
-    - DependentLiterals.Int
+    - Kinds.Ord
 
   when:
     condition: false
-    other-modules: Paths_dependent_literals
+    other-modules: Paths_type_compare

@@ -62,10 +62,8 @@ import GHC.Exts (proxy#)
 import GHC.TypeNats (KnownNat, Nat, natVal')
 import Unsafe.Coerce (unsafeCoerce)
 
-import Kinds.Num
-         ( type (+), type (-), type (*)
-         , Compare, FromNat, ToInteger, OrdCond
-         )
+import Kinds.Num (type (+), type (-), type (*), FromNat, ToInteger)
+import Kinds.Ord (Compare, OrdCond)
 
 -- | Type-level signed numbers
 data Integer = Pos Nat | Neg Nat

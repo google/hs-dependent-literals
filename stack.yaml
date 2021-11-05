@@ -19,6 +19,7 @@ packages:
 - dependent-literals-plugin
 - numeric-kinds
 - snumber
+- type-compare
 
 extra-deps:
 - attenuation-0.2.0

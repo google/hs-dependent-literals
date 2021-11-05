@@ -4,18 +4,18 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 
-name:           dependent-literals
-version:        0.2.0
-synopsis:       Library for dependent-literals-plugin
-description:    This is the library counterpart of
-                <https://hackage.haskell.org/package/dependent-literals-plugin dependent-literals-plugin>.
-                See that package's description for more details.
-category:       Constraints
+name:           type-compare
+version:        0.1.0
+synopsis:       Type-level Ord compatibility layer
+description:    In @base-4.16.0.0@, an open type family @Compare@ was added as a type-level
+                analog of @Ord@.  This package provides a compatible interface on earlier
+                versions of @base@, and re-exports the canonical one with later versions.
+category:       Type
 homepage:       https://github.com/google/hs-dependent-literals#readme
 bug-reports:    https://github.com/google/hs-dependent-literals/issues
 author:         Andrew Pritchard <awpr@google.com>
 maintainer:     Andrew Pritchard <awpr@google.com>
-copyright:      2019-2021 Google LLC
+copyright:      2021 Google LLC
 license:        Apache-2.0
 license-file:   LICENSE
 build-type:     Simple
@@ -25,22 +25,13 @@ extra-source-files:
 source-repository head
   type: git
   location: https://github.com/google/hs-dependent-literals
-  subdir: dependent-literals
+  subdir: type-compare
 
 library
   exposed-modules:
-      DependentLiterals
-      DependentLiterals.Bounds
-      DependentLiterals.Int
+      Kinds.Ord
   hs-source-dirs:
       src
   build-depends:
       base >=4.12 && <4.17
-    , fin-int >=0.1 && <0.3
-    , numeric-kinds >=0.1 && <0.3
-    , sint >=0.1 && <0.3
-    , snumber >=0.1 && <0.3
-    , tagged ==0.8.*
-    , type-compare ==0.1.*
-    , wrapped ==0.1.*
   default-language: Haskell2010
