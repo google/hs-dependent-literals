@@ -1,4 +1,4 @@
-# 0.2.0 (2021-11-04)
+# 0.2.0 (2021-11-05)
 
 * Get type-level `Ord` from `type-compare` instead of `numeric-kinds`.
   * Check inequality tests like `<?` against `True` rather than checking

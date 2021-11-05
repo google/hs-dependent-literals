@@ -1,4 +1,4 @@
-# 0.1.0 (2021-11-04)
+# 0.1.0 (2021-11-05)
 
 Initial version, moved out of `numeric-kinds`.
 

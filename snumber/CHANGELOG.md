@@ -1,4 +1,4 @@
-# 0.2.0.1 (2021-10-24)
+# 0.2.0.1 (2021-11-05)
 
 * Get type-level `Ord` from the new `type-compare` compatibility library.
 

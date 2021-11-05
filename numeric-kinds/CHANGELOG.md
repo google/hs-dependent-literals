@@ -1,4 +1,4 @@
-# 0.2.0 (2021-11-04)
+# 0.2.0 (2021-11-05)
 
 * Remove `Cmp` in favor of the new `type-compare` compatibility layer.
 
