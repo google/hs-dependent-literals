@@ -48,7 +48,7 @@ import Data.Type.Ord
          , Max, Min
          )
 #else
-import GHC.TypeNats (CmpNat)
+import GHC.TypeLits (CmpNat)
 
 -- | Type-level Ord "kindclass".
 --
