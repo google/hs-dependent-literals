@@ -1,3 +1,7 @@
+# 0.2.0.1 (2021-10-24)
+
+* Get type-level `Ord` from the new `type-compare` compatibility library.
+
 # 0.2.0 (2021-10-24)
 
 * Downgrade the `unSNumber` field selector to be unidirectional.

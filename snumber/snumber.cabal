@@ -5,7 +5,7 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           snumber
-version:        0.2.0
+version:        0.2.0.1
 synopsis:       Integer singletons with flexible representation
 description:    This provides singletons-style witnesses for type-level integers, and some
                 limited arithmetic operations on them.  Instead of working with (invisible,

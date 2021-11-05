@@ -1,6 +1,6 @@
-# 0.2.0
+# 0.2.0 (2021-11-04)
 
-* Update for `numeric-kinds-0.2.0`.
+* Get type-level `Ord` from `type-compare` instead of `numeric-kinds`.
   * Check inequality tests like `<?` against `True` rather than checking
     `Ordering`s against `EQ`.
   * This could in theory require updating constraints, but probably won't break
