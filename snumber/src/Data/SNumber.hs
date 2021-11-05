@@ -110,7 +110,7 @@ import Kinds.Num (type (+), type (-), type (*))
 -- * @CmpInteger m n ~ 'LT@ iff @compare m n == LT@ (according to 'Ord').
 -- * @CmpInteger m n ~ 'EQ@ iff @compare m n == EQ@.
 -- * @CmpInteger m n ~ 'GT@ iff @compare m n == GT@.
--- * @toInteger n == integerVal \@n@
+-- * @toInteger n == integerVal \@n@.
 -- * @a@ upholds the 'Ord' laws.
 --
 -- These are exactly the set of things we're willing to 'unsafeCoerce' proofs
