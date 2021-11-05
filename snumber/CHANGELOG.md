@@ -1,7 +1,7 @@
 # 0.3.0 (2021-11-05)
 
 * Get type-level `Ord` from the new `type-compare` compatibility library.
-* Get 'SOrdering` from `type-compare` under the new name `OrderingI`.
+* Get `SOrdering` from `type-compare` under the new name `OrderingI`.
   * It's no longer exported from `Data.SNumber`; depend on `type-compare` or a
     new-enough version of `base`.
 
