@@ -62,6 +62,7 @@ type family Compare (x :: k) (y :: k) :: Ordering
 type instance Compare {- k=Nat -} x y = CmpNat x y
 #endif
 
+-- | @CompareCond x y lt eq gt@ is @lt@ if @x@ is less than @y@, and so on.
 type CompareCond x y lt eq gt = OrdCond (Compare x y) lt eq gt
 
 -- Recently added to base.

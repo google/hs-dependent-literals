@@ -525,6 +525,7 @@ tryMul
   => SNumber a m -> SNumber a n -> Maybe (SNumber a (m * n))
 tryMul = unsafeMkTry overflowMul
 
+-- | An exception for overflows in checked 'SNumber' arithmetic.
 data UnrepresentableSNumber = UnrepresentableSNumber String Integer Integer
   deriving Show
 

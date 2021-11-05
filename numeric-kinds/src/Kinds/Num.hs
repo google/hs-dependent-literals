@@ -12,7 +12,7 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
--- | Type-level 'Ord' and 'Num'.
+-- | Type-level equivalent of a subset of 'Num'.
 --
 -- This provides "kindclasses" (actually open type families) with functionality
 -- analogous to that provided by the typeclasses 'Ord' and 'Num'.  Since
