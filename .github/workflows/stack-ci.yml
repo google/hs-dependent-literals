@@ -97,7 +97,6 @@ jobs:
           path: |
             ${{ steps.setup-stack.outputs.stack-root }}/pantry/pantry*
             ${{ steps.setup-stack.outputs.stack-root }}/pantry/hackage/*
-            !${{ steps.setup-stack.outputs.stack-root }}/pantry/hackage/*.tar
             !${{ steps.setup-stack.outputs.stack-root }}/pantry/hackage/*.tar.gz
           key: ${{ runner.os }}-${{ matrix.build.compiler }}-${{ hashFiles('timestamp.json') }}
           restore-keys: |
