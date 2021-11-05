@@ -33,8 +33,11 @@ module Kinds.Ord
            -- ** Inequality Constraints
          , type (<), type (<=), type (==), type (/=), type (>=), type (>)
 
+           -- ** Selection
+         , Max, Min
+
            -- * Utility
-         , Proven, OrdCond
+         , Proven, OrdCond, CompareCond
          ) where
 
 #if MIN_VERSION_base(4, 16, 0)
@@ -42,6 +45,7 @@ import Data.Type.Ord
          ( Compare, OrdCond
          , type (<?), type (>?), type (<=?), type (>=?)
          , type (<=), type (>=), type (>)
+         , Max, Min
          )
 #else
 import GHC.TypeNats (CmpNat)
@@ -58,6 +62,8 @@ type family Compare (x :: k) (y :: k) :: Ordering
 type instance Compare {- k=Nat -} x y = CmpNat x y
 #endif
 
+type CompareCond x y lt eq gt = OrdCond (Compare x y) lt eq gt
+
 -- Recently added to base.
 #if !MIN_VERSION_base(4, 16, 0)
 
@@ -72,16 +78,16 @@ type family OrdCond (o :: Ordering) (lt :: k) (eq :: k) (gt :: k) :: k where
 
 infix 4 <?, >?, <=?, >=?
 
-type x <?  y = OrdCond (Compare x y) True False False
-type x >?  y = OrdCond (Compare x y) False False True
-type x <=? y = OrdCond (Compare x y) True True False
-type x >=? y = OrdCond (Compare x y) False True True
+type x <?  y = CompareCond x y True False False
+type x >?  y = CompareCond x y False False True
+type x <=? y = CompareCond x y True True False
+type x >=? y = CompareCond x y False True True
 #endif
 
 infix ==?, /=?
 
-type x ==? y = OrdCond (Compare x y) False True False
-type x /=? y = OrdCond (Compare x y) True False True
+type x ==? y = CompareCond x y False True False
+type x /=? y = CompareCond x y True False True
 
 -- | Turns a type-level 'Bool' into a 'Data.Kind.Constraint' that it's 'True'.
 type Proven b = b ~ 'True
@@ -101,3 +107,8 @@ infix 4 <, ==, /=
 type x <  y = Proven (x <? y)
 type x == y = Proven (x ==? y)
 type x /= y = Proven (x /=? y)
+
+#if !MIN_VERSION_base(4, 16, 0)
+type Min x y = CompareCond x y x x y
+type Max x y = CompareCond x y y y x
+#endif
