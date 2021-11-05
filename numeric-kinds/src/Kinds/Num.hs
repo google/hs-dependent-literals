@@ -15,12 +15,12 @@
 -- | Type-level equivalent of a subset of 'Num'.
 --
 -- This provides "kindclasses" (actually open type families) with functionality
--- analogous to that provided by the typeclasses 'Ord' and 'Num'.  Since
--- type-level typeclasses don't exist, instead we translate each would-be
--- method to its own open type family; then "instances" are implemented by
--- providing clauses for each type family "method".  Unfortunately this means
--- we can't group methods into classes that must be implemented all-or-none,
--- but in practice this seems to be okay.
+-- analogous to that provided by the 'Num' typeclass.  Since type-level
+-- typeclasses don't exist, instead we translate each would-be method to its
+-- own open type family; then "instances" are implemented by providing clauses
+-- for each type family "method".  Unfortunately this means we can't group
+-- methods into classes that must be implemented all-or-none, but in practice
+-- this seems to be okay.
 
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE ConstraintKinds #-}

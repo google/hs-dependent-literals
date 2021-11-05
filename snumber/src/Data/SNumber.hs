@@ -12,8 +12,6 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
--- | Runtime witnesses of type-level integers.
-
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE CPP #-}
@@ -37,6 +35,8 @@
 {-# LANGUAGE UnboxedTuples #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE ViewPatterns #-}
+
+-- | Runtime witnesses of type-level integers.
 
 module Data.SNumber
          ( -- * SNumber
@@ -374,7 +374,7 @@ class KnownSNumber a n where
   -- | Implementation of 'snumberVal'.
   --
   -- This has an inconvenient type variable order because it derives from the
-  -- order they appear in the class head.
+  -- order they appear in the class head; see 'snumberVal'.
   snumberVal_ :: SNumber a n
   default snumberVal_ :: (SNumberRepr a, KnownInteger n) => SNumber a n
   snumberVal_ = fromMaybe (error "KnownSNumber: unrepresentable") trySNumber
